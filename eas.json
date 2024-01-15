@@ -1,0 +1,42 @@
+{
+  "build": {
+    "base": {
+      "android": {
+        "image": "latest",
+        "env": {
+          "PLATFORM": "android"
+        },
+        "cache": {
+          "disabled": true
+        }
+      },
+      "ios": {
+        "resourceClass": "m-medium",
+        "image": "latest",
+        "env": {
+          "PLATFORM": "ios"
+        },
+        "cache": {
+          "disabled": true
+        }
+      },
+      "channel": "base"
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "APP_VARIANT": "development"
+      }
+    }
+  },
+  "submit": {
+    "release": {}
+  },
+  "cli": {
+    "version": ">= 3.9.2",
+    "requireCommit": true
+  }
+}
