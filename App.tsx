@@ -1,12 +1,27 @@
+import { NavigationContainer } from '@react-navigation/native';
+import * as tf from '@tensorflow/tfjs';
+import '@tensorflow/tfjs-react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+
+import MainNavigator from './src/navigators/main';
 
 export default function App() {
+  const [isTfReady, setIsTfReady] = useState(false);
+
+  useEffect(() => {
+    const checkTfReady = async () => {
+      await tf.ready();
+      console.log('TF ready');
+      setIsTfReady(true);
+    };
+    checkTfReady();
+  }, []);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <MainNavigator />
+    </NavigationContainer>
   );
 }
 
@@ -15,6 +30,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 });
