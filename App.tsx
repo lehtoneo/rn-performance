@@ -8,13 +8,10 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import MainNavigator from './src/navigators/main';
 
 export default function App() {
-  const [isTfReady, setIsTfReady] = useState(false);
-
   useEffect(() => {
     const checkTfReady = async () => {
       await tf.ready();
       console.log('TF ready');
-      setIsTfReady(true);
     };
     checkTfReady();
   }, []);
