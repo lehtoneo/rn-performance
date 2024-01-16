@@ -9,38 +9,11 @@ import {
   View
 } from 'react-native';
 
+import { useToxicityModel } from '../hooks/ml';
+
 const Toxicity = () => {
-  const [predictions, setPredictions] = useState<
-    {
-      label: string;
-      results: {
-        probabilities: Float32Array;
-        match: boolean;
-      }[];
-    }[]
-  >([]);
-  const [predicting, setPredicting] = useState(false);
-
+  const { classifying, results, classifyAsync } = useToxicityModel();
   const [text, setText] = useState('');
-
-  const handlePredict = async () => {
-    if (predicting) return;
-
-    setPredictions([]);
-    setPredicting(true);
-    const model = await toxicity.load(0.8, [
-      'identity_attack',
-      'insult',
-      'obscene',
-      'severe_toxicity',
-      'sexual_explicit',
-      'threat',
-      'toxicity'
-    ]);
-    const predictions = await model.classify(text);
-    setPredictions(predictions);
-    setPredicting(false);
-  };
 
   return (
     <View style={{ flex: 1, padding: 8 * 2 }}>
@@ -53,13 +26,21 @@ const Toxicity = () => {
         />
       </View>
 
-      {predicting && <Text>Predicting...</Text>}
+      {classifying && <Text>Predicting...</Text>}
 
-      {!predicting && <Button title="Predict" onPress={handlePredict} />}
+      {!classifying && (
+        <Button
+          title="Predict"
+          onPress={async () => {
+            await classifyAsync(text);
+            setText('');
+          }}
+        />
+      )}
 
       <ScrollView>
         <View style={{ gap: 8 }}>
-          {predictions.map((pred, i) => {
+          {results.map((pred, i) => {
             const isMatch = pred.results[0].match;
             return (
               <View key={i}>
