@@ -1,21 +1,22 @@
 import * as toxicity from '@tensorflow-models/toxicity';
 import { useState } from 'react';
 
+interface ToxicityResult {
+  label: string;
+  results: {
+    probabilities: Float32Array;
+    match: boolean;
+  }[];
+}
+
 /**
  * A hook that uses the toxicity model to classify text.
  * @returns
  */
 export const useToxicityModel = () => {
   const [error, setError] = useState<string | null>(null);
-  const [results, setResults] = useState<
-    {
-      label: string;
-      results: {
-        probabilities: Float32Array;
-        match: boolean;
-      }[];
-    }[]
-  >([]);
+  const [results, setResults] = useState<ToxicityResult[]>([]);
+
   const [classifying, setClassifying] = useState(false);
 
   const handlePredict = async (text: string) => {

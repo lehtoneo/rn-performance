@@ -22,6 +22,7 @@
     "expo-gl": "~13.0.1",
     "expo-status-bar": "~1.6.0",
     "expo-updates": "~0.18.19",
+    "onnxruntime-react-native": "^1.17.0",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-fs": "^2.20.0",
