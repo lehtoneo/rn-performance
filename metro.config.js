@@ -7,4 +7,6 @@ config.resolver.assetExts.push(
   'bin'
 );
 
+config.resolver.sourceExts.push('tflite')
+
 module.exports = config;

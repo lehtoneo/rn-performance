@@ -12,6 +12,12 @@
         {
           "cameraPermissions": "Allow rn-performance to access your camera."
         }
+      ],
+      [
+        "react-native-fast-tflite",
+        {
+          "enableCoreMLDelegate": true
+        }
       ]
     ],
     "splash": {
