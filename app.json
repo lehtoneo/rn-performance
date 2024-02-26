@@ -2,6 +2,7 @@
   "expo": {
     "name": "rn-performance",
     "main": "expo-router/entry",
+    "scheme": "rn-performance",
     "slug": "rn-performance",
     "version": "1.0.0",
     "orientation": "portrait",

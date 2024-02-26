@@ -6,7 +6,7 @@ const Test = () => {
     <View>
       <Link
         href={{
-          pathname: '/sddj'
+          pathname: '/home'
         }}
       >
         Test
