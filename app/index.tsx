@@ -4,7 +4,13 @@ import { Text, View } from 'react-native';
 const Test = () => {
   return (
     <View>
-      <Link href={'/'}>Test</Link>
+      <Link
+        href={{
+          pathname: '/sddj'
+        }}
+      >
+        Test
+      </Link>
       <Text>Moi</Text>
     </View>
   );
