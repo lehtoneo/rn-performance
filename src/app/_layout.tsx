@@ -14,7 +14,6 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         screenOptions={{
           header: () => null
         }}
-        initialRouteName="home"
       />
     </QueryClientProvider>
   );

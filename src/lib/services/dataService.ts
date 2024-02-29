@@ -1,3 +1,4 @@
+import { ModelType } from '../types';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 
@@ -8,10 +9,11 @@ const baseDataUrl = `http://${localIP}:3000/api/data`;
 export interface ImageNetQuery {
   amount: number;
   skip: number;
-  type: 'uint8' | 'float32';
+  type: ModelType;
 }
 
 type FetchImageNetDataData = {
+  id: string;
   buffer: {
     type: 'buffer';
     data: number[];
@@ -40,9 +42,13 @@ export const createDataService = () => {
 
     const data = response.data.map((d) => {
       const buffer = Buffer.from(d.buffer.data);
-      const array = new Uint8Array(d.rawImageBuffer.data);
+      const array =
+        query.type === 'uint8'
+          ? new Uint8Array(d.rawImageBuffer.data)
+          : new Float32Array(d.rawImageBuffer.data);
       const base64 = buffer.toString('base64');
       return {
+        id: d.id,
         array,
         buffer: buffer,
         base64
@@ -57,39 +63,10 @@ export const createDataService = () => {
   };
 };
 
-async function getImageDataAsUint8Array(imageUrl: string) {
-  try {
-    const response = await fetch(imageUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    return uint8Array;
-  } catch (error) {
-    console.error('Error fetching image:', error);
-    return null;
-  }
-}
-
-async function fetchImageAsUint8Array(url: string): Promise<Uint8Array | null> {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    return new Promise<Uint8Array>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        const uint8Array = new Uint8Array(arrayBuffer);
-        resolve(uint8Array);
-      };
-      reader.onerror = () =>
-        reject(new Error('Error reading blob as ArrayBuffer'));
-      reader.readAsArrayBuffer(blob);
-    });
-  } catch (error) {
-    console.error('Error fetching image:', error);
-    return null;
-  }
-}
+export type DataService = ReturnType<typeof createDataService>;
+export type FetchImageNetResult = Awaited<
+  ReturnType<DataService['fetchImageNetData']>
+>;
 /**
  * - A data service object
  */

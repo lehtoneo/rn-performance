@@ -1,96 +1,90 @@
-import { useQuery } from '@tanstack/react-query';
-import { Buffer } from 'buffer';
+import { Link } from 'expo-router';
 import * as React from 'react';
 import {
   ActivityIndicator,
   Button,
-  Image,
-  ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View
 } from 'react-native';
-import { useResizePlugin } from 'vision-camera-resize-plugin';
 
+import RadioGroup from '@/components/tests/radio-group';
+
+import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
-import dataService, { ImageNetQuery } from '@/lib/services/dataService';
-import { imageNetLabels } from '@/lib/util/imagenet_labels';
-import imagesUtil from '@/lib/util/images';
+import { ModelType } from '@/lib/types';
+import { perfUtil } from '@/lib/util/performance';
 
 export default function App(): React.ReactNode {
-  const [predictionIndex, setPredictionIndex] = React.useState<number>(0);
+  const [modelType, setModelType] = React.useState<ModelType>('float32');
 
-  const [predictions, setPredictions] = React.useState<string[]>([]);
-  const prediction = imageNetLabels[predictionIndex];
-  const t = useReactNativeFastTfLite({ model: 'mobilenet_224_uint8' });
+  const [results, setResults] = React.useState<number[]>([]);
+  const [running, setRunning] = React.useState(false);
+  const t = useReactNativeFastTfLite({ model: 'mobilenet', type: modelType });
+  const d = useImageNetData(modelType);
 
-  const queryVars: ImageNetQuery = { amount: 10, skip: 0, type: 'uint8' };
-
-  const d = useQuery({
-    queryKey: ['imageNetData', queryVars],
-    queryFn: async () => {
-      const d = await dataService.fetchImageNetData(queryVars);
-
-      return d;
+  const runPredictions = async () => {
+    if (!d.data || !t.model) {
+      console.log({ d, t });
+      return;
     }
-  });
-  // from https://www.kaggle.com/models/tensorflow/efficientdet/frameworks/tfLite
-  const model = t.model;
+    setRunning(true);
+    let i = 0;
 
-  const { resize } = useResizePlugin();
+    let promises: (() => Promise<any>)[] = [];
+    while (i < d.data.length) {
+      const data = d.data[i];
 
-  const firstVal = d.data?.[0];
+      promises.push(async () => t.model!.run([data.array]));
+      i++;
+    }
+    const r = await perfUtil.createMultipleAsyncPerformanceTests({
+      name: 'run',
+      fns: promises
+    });
+
+    console.log({ r });
+
+    setResults(r.results.map((r) => r.time));
+    setRunning(false);
+  };
+
+  const avg = results.reduce((a, b) => a + b, 0) / results.length;
   return (
     <View style={styles.container}>
-      {!d.data ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Button
-          title="Moi"
-          onPress={async () => {
-            setPredictions([]);
-            let i = 0;
+      <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
+        <View>
+          <Text>See results</Text>
+        </View>
+      </Link>
 
-            while (i < d.data.length) {
-              const data = d.data[i];
-              const r = await t.actualModel?.run([data.array]);
-              if (r) {
-                const pred = r[0] as unknown as number[];
-                const max = Math.max(...pred);
-                console.log({ max });
-                const maxIndex = pred.indexOf(max);
-                setPredictions((prev) => {
-                  return [...prev, imageNetLabels[maxIndex - 1]];
-                });
-              }
-              i++;
-            }
-          }}
+      <RadioGroup<ModelType>
+        options={[
+          {
+            label: 'uint8',
+            value: 'uint8'
+          },
+          {
+            label: 'float32',
+            value: 'float32'
+          }
+        ]}
+        value={modelType}
+        onChange={(value) => setModelType(value)}
+      />
+
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Button
+          title="Run predictions"
+          onPress={runPredictions}
+          disabled={running || !d.data || !t.model}
         />
-      )}
-      <ScrollView>
-        {d.data &&
-          d.data.map((d, index) => {
-            const base64 = d.base64;
-            const pred = predictions[index];
-            return (
-              <View key={index}>
-                <Image
-                  key={index}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    resizeMode: 'cover'
-                  }}
-                  source={{
-                    uri: `data:image/jpeg;base64,${base64}`
-                  }}
-                />
-                <Text>{pred}</Text>
-              </View>
-            );
-          })}
-      </ScrollView>
+        {d.isLoading && <Text>Loading data</Text>}
+        {!t.model && <Text>Loading model...</Text>}
+        {running && <ActivityIndicator size="large" color="#0000ff" />}
+        {avg > 0 && <Text>Avg: {avg}ms</Text>}
+      </View>
     </View>
   );
 }
@@ -99,6 +93,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    padding: 8
   }
 });
