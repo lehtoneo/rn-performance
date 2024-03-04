@@ -27,17 +27,19 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 8
+    gap: 8
   },
   radio: {
     padding: 8,
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    width: 100,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 8
   },
   selectedStyle: {
-    backgroundColor: 'red'
+    backgroundColor: 'green'
   }
 });
 

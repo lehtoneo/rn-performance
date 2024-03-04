@@ -8,49 +8,33 @@ import {
   Text,
   View
 } from 'react-native';
+import { TensorflowModelDelegate } from 'react-native-fast-tflite';
 
+import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 import RadioGroup from '@/components/tests/radio-group';
 
 import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
+import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { ModelType } from '@/lib/types';
 import { perfUtil } from '@/lib/util/performance';
 
 export default function App(): React.ReactNode {
-  const [modelType, setModelType] = React.useState<ModelType>('float32');
+  const [modelType, setModelType] = React.useState<ModelType>('uint8');
+  const [delegate, setDelegate] =
+    React.useState<TensorflowModelDelegate>('default');
+  const fastTfLite = useReactNativeFastTfLite({
+    model: 'mobilenet',
+    type: modelType,
+    delegate: delegate
+  });
+  const imagenet = useImageNetData(modelType);
+  const test = usePerformanceEvaluator({
+    mlModel: fastTfLite.model || null,
+    data: imagenet.data?.map((d) => [d.array]) || null
+  });
 
-  const [results, setResults] = React.useState<number[]>([]);
-  const [running, setRunning] = React.useState(false);
-  const t = useReactNativeFastTfLite({ model: 'mobilenet', type: modelType });
-  const d = useImageNetData(modelType);
-
-  const runPredictions = async () => {
-    if (!d.data || !t.model) {
-      console.log({ d, t });
-      return;
-    }
-    setRunning(true);
-    let i = 0;
-
-    let promises: (() => Promise<any>)[] = [];
-    while (i < d.data.length) {
-      const data = d.data[i];
-
-      promises.push(async () => t.model!.run([data.array]));
-      i++;
-    }
-    const r = await perfUtil.createMultipleAsyncPerformanceTests({
-      name: 'run',
-      fns: promises
-    });
-
-    console.log({ r });
-
-    setResults(r.results.map((r) => r.time));
-    setRunning(false);
-  };
-
-  const avg = results.reduce((a, b) => a + b, 0) / results.length;
+  const avg = test.results.reduce((a, b) => a + b, 0) / test.results.length;
   return (
     <View style={styles.container}>
       <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
@@ -59,32 +43,36 @@ export default function App(): React.ReactNode {
         </View>
       </Link>
 
-      <RadioGroup<ModelType>
+      <Text>Delegate</Text>
+      <RadioGroup<TensorflowModelDelegate>
         options={[
           {
-            label: 'uint8',
-            value: 'uint8'
+            label: 'default',
+            value: 'default'
           },
           {
-            label: 'float32',
-            value: 'float32'
+            label: 'core-ml',
+            value: 'core-ml'
+          },
+          {
+            label: 'metal',
+            value: 'metal'
           }
         ]}
-        value={modelType}
-        onChange={(value) => setModelType(value)}
+        value={delegate}
+        onChange={(value) => setDelegate(value)}
       />
 
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Button
-          title="Run predictions"
-          onPress={runPredictions}
-          disabled={running || !d.data || !t.model}
-        />
-        {d.isLoading && <Text>Loading data</Text>}
-        {!t.model && <Text>Loading model...</Text>}
-        {running && <ActivityIndicator size="large" color="#0000ff" />}
-        {avg > 0 && <Text>Avg: {avg}ms</Text>}
-      </View>
+      <PerformanceEvaluatingScreen
+        modelLoadError={fastTfLite.error ? 'Error loading model' : null}
+        performanceEvaluator={test}
+        modelTypeProps={{
+          value: modelType,
+          onChange: setModelType
+        }}
+        loadingData={!imagenet.data}
+        loadingModel={!fastTfLite.model}
+      />
     </View>
   );
 }
@@ -92,7 +80,6 @@ export default function App(): React.ReactNode {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     padding: 8
   }
 });

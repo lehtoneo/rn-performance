@@ -1,6 +1,9 @@
 {
   "expo": {
     "name": "rn-performance",
+    "experiments": {
+      "typedRoutes": true
+    },
     "main": "expo-router/entry",
     "scheme": "rn-performance",
     "slug": "rn-performance",
@@ -53,8 +56,5 @@
     "updates": {
       "url": "https://u.expo.dev/b3cae706-d75e-4346-b02f-61a0e975d529"
     }
-  },
-  "experiments": {
-    "typedRoutes": true
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Tensor,
   TensorflowModel,
+  TensorflowModelDelegate,
   useTensorflowModel
 } from 'react-native-fast-tflite';
 
@@ -11,13 +12,20 @@ type Model = 'mobilenet';
 
 const models: Record<Model, Record<ModelType, any>> = {
   mobilenet: {
-    uint8: require('../../../../../assets/models/mlperf/mobilenet_edgetpu_224_1.0_uint8.tflite'),
-    float32: require('../../../../../assets/models/mlperf/mobilenet_edgetpu_224_1.0_float32.tflite')
+    uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_uint8.tflite'),
+    float32: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_float32.tflite')
   }
 };
 
-const useReactNativeFastTfLite = (opts: { model: Model; type: ModelType }) => {
-  const model = useTensorflowModel(models[opts.model][opts.type]);
+const useReactNativeFastTfLite = (opts: {
+  model: Model;
+  type: ModelType;
+  delegate?: TensorflowModelDelegate;
+}) => {
+  const model = useTensorflowModel(
+    models[opts.model][opts.type],
+    opts.delegate
+  );
 
   React.useEffect(() => {
     if (!model.model) return;
@@ -26,7 +34,8 @@ const useReactNativeFastTfLite = (opts: { model: Model; type: ModelType }) => {
 
   console.log(`Model: ${model.state} (${model.model != null})`);
   return {
-    model: model.model
+    model: model.model,
+    error: model.state === 'error'
   };
 };
 

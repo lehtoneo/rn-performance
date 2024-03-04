@@ -6,6 +6,9 @@ type PerformanceTestOpts<T> = {
 async function createMultipleAsyncPerformanceTests<T>(opts: {
   name: string;
   fns: Array<() => Promise<T>>;
+  opts?: {
+    logResults?: boolean;
+  };
 }) {
   let sum = 0;
   let avg = 0;
@@ -19,7 +22,9 @@ async function createMultipleAsyncPerformanceTests<T>(opts: {
     const r = await opts.fns[i]();
     const end = performance.now();
     const time = end - start;
-
+    if (opts.opts?.logResults) {
+      console.log(`${opts.name} took ${time}ms`);
+    }
     sum += time;
     results.push({
       fnResult: r,

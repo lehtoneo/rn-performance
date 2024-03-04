@@ -8,5 +8,6 @@ config.resolver.assetExts.push(
 );
 
 config.resolver.assetExts.push('tflite');
+config.resolver.assetExts.push('onnx');
 
 module.exports = config;
