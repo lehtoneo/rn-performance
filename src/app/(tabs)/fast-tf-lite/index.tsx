@@ -14,22 +14,33 @@ import PerformanceEvaluatingScreen from '@/components/performance-evaluating/Pef
 import RadioGroup from '@/components/tests/radio-group';
 
 import useImageNetData from '@/lib/hooks/data/useImageNetData';
-import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
+import useModelData from '@/lib/hooks/data/useModelData';
+import useReactNativeFastTfLite, {
+  Model
+} from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelPrecision } from '@/lib/types';
+import { ModelInputPrecision } from '@/lib/types';
 import { perfUtil } from '@/lib/util/performance';
 
 export default function App(): React.ReactNode {
-  const [modelPresicion, setModelPrecision] =
-    React.useState<ModelPrecision>('uint8');
+  const [modelInputPrecision, setModelInputPrecision] =
+    React.useState<ModelInputPrecision>('uint8');
   const [delegate, setDelegate] =
     React.useState<TensorflowModelDelegate>('default');
+
+  const [model, setModel] = React.useState<Model>('ssd_mobilenet');
+
   const fastTfLite = useReactNativeFastTfLite({
-    model: 'mobilenet',
-    type: modelPresicion,
+    model: model,
+    type: modelInputPrecision,
     delegate: delegate
   });
-  const imagenet = useImageNetData(modelPresicion);
+  const imagenet = useModelData({
+    dataPrecision: modelInputPrecision,
+    model: model,
+    maxAmount: 20
+  });
+
   const test = usePerformanceEvaluator({
     mlModel: fastTfLite.model || null,
     data: imagenet.data?.map((d) => [d.array]) || null
@@ -65,11 +76,15 @@ export default function App(): React.ReactNode {
       />
 
       <PerformanceEvaluatingScreen
+        modelTypeProps={{
+          value: model,
+          onChange: setModel
+        }}
         modelLoadError={fastTfLite.error ? 'Error loading model' : null}
         performanceEvaluator={test}
-        modelPrecisionProps={{
-          value: modelPresicion,
-          onChange: setModelPrecision
+        modelInputPrecisionProps={{
+          value: modelInputPrecision,
+          onChange: setModelInputPrecision
         }}
         loadingData={!imagenet.data}
         loadingModel={!fastTfLite.model}

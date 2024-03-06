@@ -1,13 +1,18 @@
 import RadioGroup from '../tests/radio-group';
 import { Button, Text, View } from 'react-native';
 
+import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import { PerformanceEvaluator } from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelPrecision } from '@/lib/types';
+import { ModelInputPrecision } from '@/lib/types';
 
 interface PerformanceEvaluatingScreenProps {
-  modelPrecisionProps: {
-    value: ModelPrecision;
-    onChange: (value: ModelPrecision) => void;
+  modelInputPrecisionProps?: {
+    value: ModelInputPrecision;
+    onChange: (value: ModelInputPrecision) => void;
+  };
+  modelTypeProps: {
+    value: Model;
+    onChange: (value: Model) => void;
   };
   performanceEvaluator: PerformanceEvaluator;
   loadingData: boolean;
@@ -18,21 +23,42 @@ const PerformanceEvaluatingScreen = (
   props: PerformanceEvaluatingScreenProps
 ) => {
   return (
-    <View>
-      <Text>Model type</Text>
-      <RadioGroup<ModelPrecision>
+    <View style={{ gap: 8 }}>
+      {props.modelInputPrecisionProps && (
+        <>
+          <Text>Input precision</Text>
+          <RadioGroup<ModelInputPrecision>
+            options={[
+              {
+                label: 'uint8',
+                value: 'uint8'
+              },
+              {
+                label: 'float32',
+                value: 'float32'
+              }
+            ]}
+            value={props.modelInputPrecisionProps.value}
+            onChange={(value) =>
+              props.modelInputPrecisionProps?.onChange(value)
+            }
+          />
+        </>
+      )}
+      <Text>Model</Text>
+      <RadioGroup<Model>
         options={[
           {
-            label: 'uint8',
-            value: 'uint8'
+            label: 'mobilenet',
+            value: 'mobilenet'
           },
           {
-            label: 'float32',
-            value: 'float32'
+            label: 'ssd_mobilenet',
+            value: 'ssd_mobilenet'
           }
         ]}
-        value={props.modelPrecisionProps.value}
-        onChange={(value) => props.modelPrecisionProps.onChange(value)}
+        value={props.modelTypeProps.value}
+        onChange={(value) => props.modelTypeProps.onChange(value)}
       />
       <Button
         title="Run inference"

@@ -15,39 +15,53 @@ import PerformanceEvaluatingScreen from '@/components/performance-evaluating/Pef
 import RadioGroup from '@/components/tests/radio-group';
 
 import useImageNetData from '@/lib/hooks/data/useImageNetData';
+import useModelData, {
+  useModelDataDimensions
+} from '@/lib/hooks/data/useModelData';
+import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
 import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelPrecision } from '@/lib/types';
+import { ModelInputPrecision } from '@/lib/types';
 import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 const Onnx = () => {
-  const [modelPrecision, setModelPrecision] = useState<ModelPrecision>('uint8');
+  const [modelType, setModelType] = useState<Model>('mobilenet');
 
-  const t2 = useOnnxRuntime({
-    type: modelPrecision,
-    model: 'mobilenet'
+  const [modelInputPrecision, setModelInputPrecision] =
+    useState<ModelInputPrecision>('uint8');
+
+  const inputDimensions = useModelDataDimensions(modelType);
+
+  const onnxRuntime = useOnnxRuntime({
+    inputPrecision: modelInputPrecision,
+    model: modelType
   });
 
-  const d = useImageNetData(modelPrecision, {
+  const d = useModelData({
+    dataPrecision: modelInputPrecision,
+    model: modelType,
     maxAmount: 20
   });
 
-  const usedData = d.data?.map((d) => {
-    const tensorA = new ort.Tensor(modelPrecision, d.array, [1, 224, 224, 3]);
+  const usedData = onnxRuntime.model
+    ? d.data?.map((d) => {
+        const imgWidth = modelType === 'mobilenet' ? 224 : 300;
+        const tensorA = new ort.Tensor(modelInputPrecision, d.array, [
+          1,
+          ...inputDimensions
+        ]);
 
-    const feeds =
-      modelPrecision === 'uint8'
-        ? { input: tensorA }
-        : ({
-            images: tensorA
-          } as any);
-    return feeds;
-  });
+        const myObject: { [key: string]: any } = {
+          [onnxRuntime.model!.inputNames![0]]: tensorA
+        };
+        return myObject;
+      })
+    : null;
 
   const ttt = usePerformanceEvaluator({
     mlModel: {
       run: async (data) => {
-        await t2.model!.run(data);
+        await onnxRuntime.model!.run(data);
       }
     },
     data: usedData || null,
@@ -59,13 +73,17 @@ const Onnx = () => {
   return (
     <View style={styles.container}>
       <PerformanceEvaluatingScreen
-        modelPrecisionProps={{
-          value: modelPrecision,
-          onChange: setModelPrecision
+        modelTypeProps={{
+          value: modelType,
+          onChange: setModelType
+        }}
+        modelInputPrecisionProps={{
+          value: modelInputPrecision,
+          onChange: setModelInputPrecision
         }}
         performanceEvaluator={ttt}
         loadingData={!d.data}
-        loadingModel={!t2.model}
+        loadingModel={!onnxRuntime.model}
         modelLoadError={null}
       />
     </View>
@@ -73,11 +91,7 @@ const Onnx = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 8
-  }
+  container: {}
 });
 
 export default Onnx;
