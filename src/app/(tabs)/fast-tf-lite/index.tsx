@@ -16,19 +16,20 @@ import RadioGroup from '@/components/tests/radio-group';
 import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 import { perfUtil } from '@/lib/util/performance';
 
 export default function App(): React.ReactNode {
-  const [modelType, setModelType] = React.useState<ModelType>('uint8');
+  const [modelPresicion, setModelPrecision] =
+    React.useState<ModelPrecision>('uint8');
   const [delegate, setDelegate] =
     React.useState<TensorflowModelDelegate>('default');
   const fastTfLite = useReactNativeFastTfLite({
     model: 'mobilenet',
-    type: modelType,
+    type: modelPresicion,
     delegate: delegate
   });
-  const imagenet = useImageNetData(modelType);
+  const imagenet = useImageNetData(modelPresicion);
   const test = usePerformanceEvaluator({
     mlModel: fastTfLite.model || null,
     data: imagenet.data?.map((d) => [d.array]) || null
@@ -66,9 +67,9 @@ export default function App(): React.ReactNode {
       <PerformanceEvaluatingScreen
         modelLoadError={fastTfLite.error ? 'Error loading model' : null}
         performanceEvaluator={test}
-        modelTypeProps={{
-          value: modelType,
-          onChange: setModelType
+        modelPrecisionProps={{
+          value: modelPresicion,
+          onChange: setModelPrecision
         }}
         loadingData={!imagenet.data}
         loadingModel={!fastTfLite.model}

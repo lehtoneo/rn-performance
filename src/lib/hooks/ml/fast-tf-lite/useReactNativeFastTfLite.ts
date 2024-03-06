@@ -6,20 +6,24 @@ import {
   useTensorflowModel
 } from 'react-native-fast-tflite';
 
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 
-type Model = 'mobilenet';
+type Model = 'mobilenet' | 'ssd_mobilenet';
 
-const models: Record<Model, Record<ModelType, any>> = {
+const models: Record<Model, Record<ModelPrecision, any>> = {
   mobilenet: {
     uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_uint8.tflite'),
     float32: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_float32.tflite')
+  },
+  ssd_mobilenet: {
+    uint8: require('../../../../../assets/models/mlperf/tf-lite/ssd_mobilenet_v2_300_uint8.tflite'),
+    float32: require('../../../../../assets/models/mlperf/tf-lite/ssd_mobilenet_v2_300_float.tflite')
   }
 };
 
 const useReactNativeFastTfLite = (opts: {
   model: Model;
-  type: ModelType;
+  type: ModelPrecision;
   delegate?: TensorflowModelDelegate;
 }) => {
   const model = useTensorflowModel(

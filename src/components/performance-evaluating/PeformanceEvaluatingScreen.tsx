@@ -2,12 +2,12 @@ import RadioGroup from '../tests/radio-group';
 import { Button, Text, View } from 'react-native';
 
 import { PerformanceEvaluator } from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 
 interface PerformanceEvaluatingScreenProps {
-  modelTypeProps: {
-    value: ModelType;
-    onChange: (value: ModelType) => void;
+  modelPrecisionProps: {
+    value: ModelPrecision;
+    onChange: (value: ModelPrecision) => void;
   };
   performanceEvaluator: PerformanceEvaluator;
   loadingData: boolean;
@@ -20,7 +20,7 @@ const PerformanceEvaluatingScreen = (
   return (
     <View>
       <Text>Model type</Text>
-      <RadioGroup<ModelType>
+      <RadioGroup<ModelPrecision>
         options={[
           {
             label: 'uint8',
@@ -31,8 +31,8 @@ const PerformanceEvaluatingScreen = (
             value: 'float32'
           }
         ]}
-        value={props.modelTypeProps.value}
-        onChange={(value) => props.modelTypeProps.onChange(value)}
+        value={props.modelPrecisionProps.value}
+        onChange={(value) => props.modelPrecisionProps.onChange(value)}
       />
       <Button
         title="Run inference"

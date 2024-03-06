@@ -2,18 +2,18 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import { useEffect, useRef, useState } from 'react';
 
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 
 type Model = 'mobilenet';
 
-const models: Record<Model, Record<ModelType, any>> = {
+const models: Record<Model, Record<ModelPrecision, any>> = {
   mobilenet: {
     uint8: require('../../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_uint8.onnx'),
     float32: require('../../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_float32.onnx')
   }
 };
 
-const useOnnxRuntime = (opts: { model: Model; type: ModelType }) => {
+const useOnnxRuntime = (opts: { model: Model; type: ModelPrecision }) => {
   const modelRef = useRef<InferenceSession | undefined>(undefined);
   const [model, setModel] = useState<InferenceSession | undefined>(undefined);
 

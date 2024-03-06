@@ -1,4 +1,4 @@
-import { ModelType } from '../types';
+import { ModelPrecision } from '../types';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 
@@ -9,7 +9,7 @@ const baseDataUrl = `http://${localIP}:3000/api/data`;
 export interface ImageNetQuery {
   amount: number;
   skip: number;
-  type: ModelType;
+  type: ModelPrecision;
 }
 
 type FetchImageNetDataData = {

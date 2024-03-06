@@ -17,48 +17,51 @@ import RadioGroup from '@/components/tests/radio-group';
 import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useOnnxRuntime from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
 import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 const Onnx = () => {
-  const [modelType, setModelType] = useState<ModelType>('uint8');
+  const [modelPrecision, setModelPrecision] = useState<ModelPrecision>('uint8');
 
   const t2 = useOnnxRuntime({
-    type: modelType,
+    type: modelPrecision,
     model: 'mobilenet'
   });
 
-  const d = useImageNetData(modelType, {
+  const d = useImageNetData(modelPrecision, {
     maxAmount: 20
+  });
+
+  const usedData = d.data?.map((d) => {
+    const tensorA = new ort.Tensor(modelPrecision, d.array, [1, 224, 224, 3]);
+
+    const feeds =
+      modelPrecision === 'uint8'
+        ? { input: tensorA }
+        : ({
+            images: tensorA
+          } as any);
+    return feeds;
   });
 
   const ttt = usePerformanceEvaluator({
     mlModel: {
       run: async (data) => {
-        const tensorA = new ort.Tensor(modelType, data, [1, 224, 224, 3]);
-
-        const feeds =
-          modelType === 'uint8'
-            ? { input: tensorA }
-            : ({
-                images: tensorA
-              } as any);
-
-        await t2.model!.run(feeds);
+        await t2.model!.run(data);
       }
     },
-    data: d.data?.map((d) => d.array) || null,
+    data: usedData || null,
     options: {
-      logResults: true
+      logResults: false
     }
   });
 
   return (
     <View style={styles.container}>
       <PerformanceEvaluatingScreen
-        modelTypeProps={{
-          value: modelType,
-          onChange: setModelType
+        modelPrecisionProps={{
+          value: modelPrecision,
+          onChange: setModelPrecision
         }}
         performanceEvaluator={ttt}
         loadingData={!d.data}

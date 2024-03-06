@@ -1,1 +1,1 @@
-export type ModelType = 'uint8' | 'float32';
+export type ModelPrecision = 'uint8' | 'float32';

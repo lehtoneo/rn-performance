@@ -4,9 +4,9 @@ import dataService, {
   FetchImageNetResult,
   ImageNetQuery
 } from '@/lib/services/dataService';
-import { ModelType } from '@/lib/types';
+import { ModelPrecision } from '@/lib/types';
 
-function useImageNetData<T extends ModelType>(
+function useImageNetData<T extends ModelPrecision>(
   type: T,
   opts?: {
     maxAmount?: number;
