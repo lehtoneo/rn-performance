@@ -1,18 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { perfUtil } from '@/lib/util/performance';
 
-function usePerformanceEvaluator<T>(opts: {
+// The performance evaluator hook is used to evaluate the performance of a model
+function useMLPerformanceEvaluator<T, T2>(opts: {
   mlModel: {
-    run: (data: T) => Promise<any>;
+    run: (data: T) => Promise<T2>;
   } | null;
   data: T[] | null;
+  validateResult?: (o: { result: T2; index: number }) => boolean;
   options?: {
     logResults?: boolean;
   };
 }) {
-  const [results, setResults] = useState<number[]>([]);
+  const [results, setResults] = useState<
+    {
+      time: number;
+      index: number;
+    }[]
+  >([]);
   const [running, setRunning] = useState(false);
+  const [accuracy, setAccuracy] = useState(0);
 
   const runPredictions = async () => {
     if (!opts.data) {
@@ -27,11 +35,14 @@ function usePerformanceEvaluator<T>(opts: {
     setRunning(true);
     let i = 0;
 
-    let promises: (() => Promise<any>)[] = [];
+    let promises: (() => Promise<T2>)[] = [];
     while (i < opts.data.length) {
       const data = opts.data[i];
 
-      promises.push(async () => opts.mlModel!.run(data));
+      promises.push(async () => {
+        const r = await opts.mlModel!.run(data);
+        return r;
+      });
       i++;
     }
     const r = await perfUtil.createMultipleAsyncPerformanceTests({
@@ -42,22 +53,58 @@ function usePerformanceEvaluator<T>(opts: {
       }
     });
 
-    setResults(r.results.map((r) => r.time));
+    setResults(r.results);
     setRunning(false);
   };
 
+  const timeResults = results.map((r) => r.time);
   const avg =
-    results.length > 0
-      ? results.reduce((a, b) => a + b, 0) / results.length
+    timeResults.length > 0
+      ? timeResults.reduce((a, b) => a + b, 0) / timeResults.length
       : 0;
+
+  // needs to be different function
+  const runAccuracy = async () => {
+    if (!opts.data) {
+      console.warn('No data, cannot run predictions');
+      return;
+    }
+    if (!opts.mlModel) {
+      console.warn('No mlModel, cannot run predictions');
+      return;
+    }
+    let i = 0;
+    let correct = 0;
+    let total = 0;
+    while (i < opts.data.length) {
+      const data = opts.data[i];
+      const r = await opts.mlModel.run(data);
+      if (opts.validateResult) {
+        if (opts.validateResult({ result: r, index: i })) {
+          correct++;
+        }
+      }
+      total++;
+      i++;
+    }
+    setAccuracy(correct / total);
+    return correct / total;
+  };
   return {
     avg,
     runPredictions,
+    /**
+     * The results of the performance test
+     * - The index of the array corresponds to the index of the data
+     * @type {Array<{ fnResult: T2; time: number }>}
+     */
     results,
-    running
+    running,
+    runAccuracy,
+    accuracy
   };
 }
 
-export type PerformanceEvaluator = ReturnType<typeof usePerformanceEvaluator>;
+export type PerformanceEvaluator = ReturnType<typeof useMLPerformanceEvaluator>;
 
-export default usePerformanceEvaluator;
+export default useMLPerformanceEvaluator;

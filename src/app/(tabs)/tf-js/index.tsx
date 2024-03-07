@@ -11,7 +11,7 @@ import useModelData, {
 } from '@/lib/hooks/data/useModelData';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useTfjsML from '@/lib/hooks/ml/tfjs/useTfjs';
-import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { ModelInputPrecision } from '@/lib/types';
 
 const TfJs = () => {
@@ -31,33 +31,33 @@ const TfJs = () => {
     return tf.tensor3d(d.array, [...inputDimenions]);
   });
 
-  const mobileNetEvaluator = usePerformanceEvaluator({
+  const mobileNetEvaluator = useMLPerformanceEvaluator({
     mlModel: tfjs.mobilenet
       ? {
           run: async (data) => {
-            await tfjs.mobilenet!.classify(data);
+            return await tfjs.mobilenet!.classify(data);
           }
         }
       : null,
     data: usedData || null
   });
 
-  const ssdMobilenetEvaluator = usePerformanceEvaluator({
+  const ssdMobilenetEvaluator = useMLPerformanceEvaluator({
     mlModel: tfjs.ssd_mobilenet
       ? {
           run: async (data) => {
-            await tfjs.ssd_mobilenet!.detect(data);
+            return await tfjs.ssd_mobilenet!.detect(data);
           }
         }
       : null,
     data: usedData || null
   });
 
-  const deepLabEvaluator = usePerformanceEvaluator({
+  const deepLabEvaluator = useMLPerformanceEvaluator({
     mlModel: tfjs.deeplabv3
       ? {
           run: async (data) => {
-            await tfjs.deeplabv3!.segment(data);
+            return await tfjs.deeplabv3!.segment(data);
           }
         }
       : null,

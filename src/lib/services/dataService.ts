@@ -8,9 +8,12 @@ const baseDataUrl = `http://${localIP}:3000/api/data`;
 
 export type DataPrecision = ModelInputPrecision | 'int32';
 
-export interface FetchImagesQuery {
+interface FetchImagesApiQuery {
   amount: number;
   skip: number;
+}
+
+export interface FetchImagesQuery extends FetchImagesApiQuery {
   type: DataPrecision;
 }
 
@@ -33,7 +36,10 @@ const getArray = (precision: DataPrecision, data: number[]) => {
     case 'uint8':
       return new Uint8Array(data);
     case 'float32':
-      return new Float32Array(data);
+      const asFloat32 = data.map((d) => {
+        return d / 255;
+      });
+      return new Float32Array(asFloat32);
   }
 };
 
@@ -47,6 +53,7 @@ const fetchImages = async (query: FetchImagesQuery, path: string) => {
 
   const data = response.data.map((d) => {
     const buffer = Buffer.from(d.buffer.data);
+
     const array = getArray(query.type, d.rawImageBuffer.data);
     const base64 = buffer.toString('base64');
     return {

@@ -17,9 +17,11 @@ import useModelData from '@/lib/hooks/data/useModelData';
 import useReactNativeFastTfLite, {
   Model
 } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
-import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { ModelInputPrecision } from '@/lib/types';
+import { imageNetLabels } from '@/lib/util/imagenet_labels';
 import { perfUtil } from '@/lib/util/performance';
+import validationUtil from '@/lib/util/validationUtil';
 
 export default function App(): React.ReactNode {
   const [modelInputPrecision, setModelInputPrecision] =
@@ -27,7 +29,7 @@ export default function App(): React.ReactNode {
   const [delegate, setDelegate] =
     React.useState<TensorflowModelDelegate>('default');
 
-  const [model, setModel] = React.useState<Model>('ssd_mobilenet');
+  const [model, setModel] = React.useState<Model>('mobilenet');
 
   const fastTfLite = useReactNativeFastTfLite({
     model: model,
@@ -40,12 +42,28 @@ export default function App(): React.ReactNode {
     maxAmount: 20
   });
 
-  const test = usePerformanceEvaluator({
-    mlModel: fastTfLite.model || null,
+  const perfEvaluator = useMLPerformanceEvaluator({
+    mlModel: fastTfLite.model
+      ? {
+          run: async (data) => {
+            const r = await fastTfLite.model!.run(data);
+            return r;
+          }
+        }
+      : null,
+    validateResult(o) {
+      if (model === 'mobilenet') {
+        const t = o.result[0] as unknown as number[];
+        return validationUtil.validateMobileNet({
+          result: t,
+          index: o.index
+        });
+      }
+      return false;
+    },
     data: imagenet.data?.map((d) => [d.array]) || null
   });
 
-  const avg = test.results.reduce((a, b) => a + b, 0) / test.results.length;
   return (
     <View style={styles.container}>
       <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
@@ -80,7 +98,7 @@ export default function App(): React.ReactNode {
           onChange: setModel
         }}
         modelLoadError={fastTfLite.error ? 'Error loading model' : null}
-        performanceEvaluator={test}
+        performanceEvaluator={perfEvaluator}
         modelInputPrecisionProps={{
           value: modelInputPrecision,
           onChange: setModelInputPrecision

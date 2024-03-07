@@ -67,7 +67,10 @@ const PerformanceEvaluatingScreen = (
       )}
       <Button
         title="Run inference"
-        onPress={props.performanceEvaluator.runPredictions}
+        onPress={async () => {
+          await props.performanceEvaluator.runPredictions();
+          await props.performanceEvaluator.runAccuracy();
+        }}
         disabled={
           props.performanceEvaluator.running ||
           props.loadingData ||
@@ -84,6 +87,9 @@ const PerformanceEvaluatingScreen = (
         <Text>
           Avg inference time: {props.performanceEvaluator.avg.toFixed(4)}ms
         </Text>
+      ) : null}
+      {props.performanceEvaluator.accuracy !== undefined ? (
+        <Text>Accuracy: {props.performanceEvaluator.accuracy.toFixed(4)}</Text>
       ) : null}
     </View>
   );

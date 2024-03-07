@@ -15,7 +15,11 @@ import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 export default function App(): React.ReactNode {
   const [predictions, setPredictions] = React.useState<string[]>([]);
-  const t = useReactNativeFastTfLite({ model: 'mobilenet', type: 'uint8' });
+  const t = useReactNativeFastTfLite({
+    model: 'mobilenet',
+    type: 'uint8',
+    delegate: 'core-ml'
+  });
   const d = useModelData({
     model: 'mobilenet',
     dataPrecision: 'uint8',
@@ -39,7 +43,6 @@ export default function App(): React.ReactNode {
               if (r) {
                 const pred = r[0] as unknown as number[];
                 const max = Math.max(...pred);
-                console.log({ max });
                 const maxIndex = pred.indexOf(max);
                 setPredictions((prev) => {
                   return [...prev, imageNetLabels[maxIndex - 1]];

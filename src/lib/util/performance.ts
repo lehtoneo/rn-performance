@@ -13,7 +13,7 @@ async function createMultipleAsyncPerformanceTests<T>(opts: {
   let sum = 0;
   let avg = 0;
 
-  let results: Array<{ fnResult: T; time: number }> = [];
+  let results: Array<{ fnResult: T; time: number; index: number }> = [];
 
   let i = 0;
   console.log('Running tests');
@@ -26,10 +26,7 @@ async function createMultipleAsyncPerformanceTests<T>(opts: {
       console.log(`${opts.name} took ${time}ms`);
     }
     sum += time;
-    results.push({
-      fnResult: r,
-      time: end - start
-    });
+    results = [...results, { fnResult: r, time, index: i }];
     i++;
   }
 

@@ -11,8 +11,9 @@ import useModelData, {
 } from '@/lib/hooks/data/useModelData';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
-import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { ModelInputPrecision } from '@/lib/types';
+import validationUtil from '@/lib/util/validationUtil';
 
 const Onnx = () => {
   const [modelType, setModelType] = useState<Model>('mobilenet');
@@ -48,13 +49,25 @@ const Onnx = () => {
       })
     : null;
 
-  const ttt = usePerformanceEvaluator({
+  const ttt = useMLPerformanceEvaluator({
     mlModel: {
       run: async (data) => {
-        await onnxRuntime.model!.run(data);
+        return await onnxRuntime.model!.run(data);
       }
     },
     data: usedData || null,
+    validateResult: (o) => {
+      if (modelType === 'mobilenet') {
+        const t2 = onnxRuntime.model?.outputNames[0] || '';
+        const t = o.result[t2] as any;
+        const d = t.cpuData as number[];
+        return validationUtil.validateMobileNet({
+          result: d,
+          index: o.index
+        });
+      }
+      return false;
+    },
     options: {
       logResults: false
     }
