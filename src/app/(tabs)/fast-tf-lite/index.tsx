@@ -13,7 +13,6 @@ import { TensorflowModelDelegate } from 'react-native-fast-tflite';
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 import RadioGroup from '@/components/tests/radio-group';
 
-import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useModelData from '@/lib/hooks/data/useModelData';
 import useReactNativeFastTfLite, {
   Model

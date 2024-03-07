@@ -13,6 +13,10 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
   ssd_mobilenet: {
     uint8: require('../../../../../assets/models/mlperf/onnx/ssd_mobilenet_v2_300_uint8.onnx'),
     float32: require('../../../../../assets/models/mlperf/onnx/ssd_mobilenet_v2_300_float.onnx')
+  },
+  deeplabv3: {
+    uint8: require('../../../../../assets/models/mlperf/onnx/deeplabv3_mnv2_ade20k_uint8.onnx'),
+    float32: require('../../../../../assets/models/mlperf/onnx/deeplabv3_mnv2_ade20k_float.onnx')
   }
 };
 

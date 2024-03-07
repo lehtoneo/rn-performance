@@ -9,14 +9,18 @@ import {
   View
 } from 'react-native';
 
-import useImageNetData from '@/lib/hooks/data/useImageNetData';
+import useModelData from '@/lib/hooks/data/useModelData';
 import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 export default function App(): React.ReactNode {
   const [predictions, setPredictions] = React.useState<string[]>([]);
   const t = useReactNativeFastTfLite({ model: 'mobilenet', type: 'uint8' });
-  const d = useImageNetData('uint8');
+  const d = useModelData({
+    model: 'mobilenet',
+    dataPrecision: 'uint8',
+    maxAmount: 30
+  });
 
   return (
     <View style={styles.container}>

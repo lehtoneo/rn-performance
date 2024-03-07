@@ -76,9 +76,14 @@ export const createDataService = () => {
     return await fetchImages(query, 'coco');
   };
 
+  const fetckAde20kData = async (query: FetchImagesQuery) => {
+    return await fetchImages(query, 'ade20k');
+  };
+
   return {
     fetchImageNetData,
-    fetchCocoData
+    fetchCocoData,
+    fetckAde20kData
   };
 };
 

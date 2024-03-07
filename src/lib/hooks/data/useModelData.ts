@@ -15,6 +15,21 @@ export const useModelDataDimensions = (
       return [224, 224, 3];
     case 'ssd_mobilenet':
       return [300, 300, 3];
+    case 'deeplabv3':
+      return [512, 512, 3];
+    default:
+      throw new Error('Invalid model');
+  }
+};
+
+const getFetchFn = (model: Model) => {
+  switch (model) {
+    case 'mobilenet':
+      return dataService.fetchImageNetData;
+    case 'ssd_mobilenet':
+      return dataService.fetchCocoData;
+    case 'deeplabv3':
+      return dataService.fetckAde20kData;
     default:
       throw new Error('Invalid model');
   }
@@ -25,10 +40,8 @@ function useModelData(opts: {
   model: Model;
   maxAmount?: number;
 }) {
-  const fetchFn =
-    opts.model === 'mobilenet'
-      ? dataService.fetchImageNetData
-      : dataService.fetchCocoData;
+  const fetchFn = getFetchFn(opts.model);
+
   const maxAmount = opts?.maxAmount || 300;
   const d = useQuery({
     queryKey: [

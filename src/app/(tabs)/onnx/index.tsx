@@ -2,19 +2,10 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
 import { useEffect, useState } from 'react';
-import {
-  Button,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
-import RadioGroup from '@/components/tests/radio-group';
 
-import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useModelData, {
   useModelDataDimensions
 } from '@/lib/hooks/data/useModelData';
@@ -22,7 +13,6 @@ import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
 import usePerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { ModelInputPrecision } from '@/lib/types';
-import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 const Onnx = () => {
   const [modelType, setModelType] = useState<Model>('mobilenet');

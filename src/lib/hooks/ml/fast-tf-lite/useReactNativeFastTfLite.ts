@@ -8,7 +8,7 @@ import {
 
 import { ModelInputPrecision } from '@/lib/types';
 
-export type Model = 'mobilenet' | 'ssd_mobilenet';
+export type Model = 'mobilenet' | 'ssd_mobilenet' | 'deeplabv3';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
   mobilenet: {
@@ -18,6 +18,10 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
   ssd_mobilenet: {
     uint8: require('../../../../../assets/models/mlperf/tf-lite/ssd_mobilenet_v2_300_uint8.tflite'),
     float32: require('../../../../../assets/models/mlperf/tf-lite/ssd_mobilenet_v2_300_float.tflite')
+  },
+  deeplabv3: {
+    uint8: require('../../../../../assets/models/mlperf/tf-lite/deeplabv3_mnv2_ade20k_uint8.tflite'),
+    float32: require('../../../../../assets/models/mlperf/tf-lite/deeplabv3_mnv2_ade20k_float.tflite')
   }
 };
 

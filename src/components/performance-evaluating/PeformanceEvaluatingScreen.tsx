@@ -24,6 +24,26 @@ const PerformanceEvaluatingScreen = (
 ) => {
   return (
     <View style={{ gap: 8 }}>
+      <Text>Model</Text>
+      <RadioGroup<Model>
+        options={[
+          {
+            label: 'mobilenet',
+            value: 'mobilenet'
+          },
+          {
+            label: 'ssd_mobilenet',
+            value: 'ssd_mobilenet'
+          },
+          {
+            label: 'deeplabv3',
+            value: 'deeplabv3'
+          }
+        ]}
+        value={props.modelTypeProps.value}
+        onChange={(value) => props.modelTypeProps.onChange(value)}
+      />
+
       {props.modelInputPrecisionProps && (
         <>
           <Text>Input precision</Text>
@@ -45,21 +65,6 @@ const PerformanceEvaluatingScreen = (
           />
         </>
       )}
-      <Text>Model</Text>
-      <RadioGroup<Model>
-        options={[
-          {
-            label: 'mobilenet',
-            value: 'mobilenet'
-          },
-          {
-            label: 'ssd_mobilenet',
-            value: 'ssd_mobilenet'
-          }
-        ]}
-        value={props.modelTypeProps.value}
-        onChange={(value) => props.modelTypeProps.onChange(value)}
-      />
       <Button
         title="Run inference"
         onPress={props.performanceEvaluator.runPredictions}

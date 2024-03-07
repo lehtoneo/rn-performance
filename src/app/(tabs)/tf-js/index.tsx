@@ -6,7 +6,6 @@ import { Button, Text, View } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 
-import useImageNetData from '@/lib/hooks/data/useImageNetData';
 import useModelData, {
   useModelDataDimensions
 } from '@/lib/hooks/data/useModelData';
@@ -26,7 +25,7 @@ const TfJs = () => {
     maxAmount: 20
   });
 
-  const tfjs = useTfjsML({ model: modelType });
+  const tfjs = useTfjsML();
 
   const usedData = data?.map((d) => {
     return tf.tensor3d(d.array, [...inputDimenions]);
@@ -54,6 +53,24 @@ const TfJs = () => {
     data: usedData || null
   });
 
+  const deepLabEvaluator = usePerformanceEvaluator({
+    mlModel: tfjs.deeplabv3
+      ? {
+          run: async (data) => {
+            await tfjs.deeplabv3!.segment(data);
+          }
+        }
+      : null,
+    data: usedData || null
+  });
+
+  const usedEvaluator =
+    modelType === 'mobilenet'
+      ? mobileNetEvaluator
+      : modelType === 'ssd_mobilenet'
+        ? ssdMobilenetEvaluator
+        : deepLabEvaluator;
+
   return (
     <View>
       <PerformanceEvaluatingScreen
@@ -61,9 +78,7 @@ const TfJs = () => {
           value: modelType,
           onChange: (value) => setModelType(value)
         }}
-        performanceEvaluator={
-          modelType === 'mobilenet' ? mobileNetEvaluator : ssdMobilenetEvaluator
-        }
+        performanceEvaluator={usedEvaluator}
         loadingData={!data}
         loadingModel={!tfjs.mobilenet || !tfjs.ssd_mobilenet}
         modelLoadError={null}
