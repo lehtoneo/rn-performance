@@ -18,6 +18,7 @@ import useReactNativeFastTfLite, {
   Model
 } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import { resultService } from '@/lib/services/resultService';
 import { ModelInputPrecision } from '@/lib/types';
 import { imageNetLabels } from '@/lib/util/imagenet_labels';
 import { perfUtil } from '@/lib/util/performance';
@@ -51,14 +52,28 @@ export default function App(): React.ReactNode {
           }
         }
       : null,
-    validateResult(o) {
+    validateResult: async (o) => {
       if (model === 'mobilenet') {
+        const typedResult = o.result[0];
         const t = o.result[0] as unknown as number[];
+        // need to do the conversion because the result is a TypedArray
+        let numberArray: number[] = [];
+        for (let i = 0; i < t.length; i++) {
+          const curr = typedResult[i];
+          numberArray.push(new Number(curr).valueOf());
+        }
+        await resultService.sendImageNetResults({
+          inputIndex: o.index,
+          precision: modelInputPrecision,
+          library: 'fast-tf-lite',
+          results: numberArray
+        });
         return validationUtil.validateMobileNet({
-          result: t,
+          result: numberArray,
           index: o.index
         });
       }
+
       return false;
     },
     data: imagenet.data?.map((d) => [d.array]) || null

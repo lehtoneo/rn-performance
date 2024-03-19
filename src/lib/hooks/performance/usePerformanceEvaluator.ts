@@ -8,7 +8,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     run: (data: T) => Promise<T2>;
   } | null;
   data: T[] | null;
-  validateResult?: (o: { result: T2; index: number }) => boolean;
+  validateResult?: (o: { result: T2; index: number }) => Promise<boolean>;
   options?: {
     logResults?: boolean;
   };
@@ -80,7 +80,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
       const data = opts.data[i];
       const r = await opts.mlModel.run(data);
       if (opts.validateResult) {
-        if (opts.validateResult({ result: r, index: i })) {
+        if (await opts.validateResult({ result: r, index: i })) {
           correct++;
         }
       }

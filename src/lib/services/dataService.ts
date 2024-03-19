@@ -2,7 +2,7 @@ import { ModelInputPrecision } from '../types';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 
-const localIP = '192.168.38.134';
+export const localIP = '192.168.38.134';
 
 const baseDataUrl = `http://${localIP}:3000/api/data`;
 
