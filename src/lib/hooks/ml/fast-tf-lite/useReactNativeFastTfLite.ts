@@ -25,10 +25,16 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
   }
 };
 
+export enum FastTFLiteModelDelegate {
+  DEFAULT = 'default',
+  CoreML = 'core-ml',
+  METAL = 'metal'
+}
+
 const useReactNativeFastTfLite = (opts: {
   model: Model;
   type: ModelInputPrecision;
-  delegate?: TensorflowModelDelegate;
+  delegate?: FastTFLiteModelDelegate;
 }) => {
   const model = useTensorflowModel(
     models[opts.model][opts.type],

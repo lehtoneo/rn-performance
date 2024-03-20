@@ -20,16 +20,25 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
   }
 };
 
+export enum OnnxRuntimeExecutionProvider {
+  NNAPI = 'nnapi',
+  CPU = 'cpu',
+  COREML = 'coreml'
+}
+
 const useOnnxRuntime = (opts: {
   model: Model;
   inputPrecision: ModelInputPrecision;
+  executionProvider: OnnxRuntimeExecutionProvider;
 }) => {
   const modelRef = useRef<InferenceSession | undefined>(undefined);
   const [model, setModel] = useState<InferenceSession | undefined>(undefined);
+  const [modelLoadError, setModelLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const setupModel = async () => {
       setModel(undefined);
+      setModelLoadError(null);
       modelRef.current = undefined;
       console.log('??');
       const model = models[opts.model][opts.inputPrecision];
@@ -37,17 +46,24 @@ const useOnnxRuntime = (opts: {
       if (!asset.localUri) {
         await asset.downloadAsync();
       }
-      const session = await InferenceSession.create(asset.localUri!);
-      modelRef.current = session;
-      setModel(session);
+      try {
+        const session = await InferenceSession.create(asset.localUri!, {
+          executionProviders: [opts.executionProvider]
+        });
+        modelRef.current = session;
+        setModel(session);
+      } catch (e: any) {
+        setModelLoadError(e.message);
+      }
     };
     setupModel();
-  }, [opts.model, opts.inputPrecision]);
+  }, [opts.model, opts.inputPrecision, opts.executionProvider]);
 
   console.log(model?.inputNames);
 
   return {
-    model: model
+    model: model,
+    modelLoadError
   };
 };
 

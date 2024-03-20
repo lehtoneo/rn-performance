@@ -79,8 +79,6 @@ const TfJs = () => {
           onChange: (value) => setModelType(value)
         }}
         performanceEvaluator={usedEvaluator}
-        loadingData={!data}
-        loadingModel={!tfjs.mobilenet || !tfjs.ssd_mobilenet}
         modelLoadError={null}
       />
     </View>

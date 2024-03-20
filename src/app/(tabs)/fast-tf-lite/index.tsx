@@ -15,6 +15,7 @@ import RadioGroup from '@/components/tests/radio-group';
 
 import useModelData from '@/lib/hooks/data/useModelData';
 import useReactNativeFastTfLite, {
+  FastTFLiteModelDelegate,
   Model
 } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
@@ -27,8 +28,9 @@ import validationUtil from '@/lib/util/validationUtil';
 export default function App(): React.ReactNode {
   const [modelInputPrecision, setModelInputPrecision] =
     React.useState<ModelInputPrecision>('uint8');
-  const [delegate, setDelegate] =
-    React.useState<TensorflowModelDelegate>('default');
+  const [delegate, setDelegate] = React.useState<FastTFLiteModelDelegate>(
+    FastTFLiteModelDelegate.DEFAULT
+  );
 
   const [model, setModel] = React.useState<Model>('mobilenet');
 
@@ -57,7 +59,8 @@ export default function App(): React.ReactNode {
         inputIndex: o.index,
         precision: modelInputPrecision,
         library: 'fast-tf-lite',
-        resultsId: 'fast-tf-lite'
+        resultsId: 'fast-tf-lite',
+        inferenceTimeMs: o.timeMs
       };
       if (model === 'mobilenet') {
         const typedResult = o.result[0];
@@ -118,21 +121,13 @@ export default function App(): React.ReactNode {
       </Link>
 
       <Text>Delegate</Text>
-      <RadioGroup<TensorflowModelDelegate>
-        options={[
-          {
-            label: 'default',
-            value: 'default'
-          },
-          {
-            label: 'core-ml',
-            value: 'core-ml'
-          },
-          {
-            label: 'metal',
-            value: 'metal'
-          }
-        ]}
+      <RadioGroup<FastTFLiteModelDelegate>
+        options={Object.values(FastTFLiteModelDelegate).map((v) => {
+          return {
+            value: v,
+            label: v
+          };
+        })}
         value={delegate}
         onChange={(value) => setDelegate(value)}
       />
@@ -148,8 +143,6 @@ export default function App(): React.ReactNode {
           value: modelInputPrecision,
           onChange: setModelInputPrecision
         }}
-        loadingData={!imagenet.data}
-        loadingModel={!fastTfLite.model}
       />
     </View>
   );

@@ -10,6 +10,7 @@ type SendResultsCommonOpts<T> = {
   precision: ModelInputPrecision;
   library: string;
   results: T;
+  inferenceTimeMs: number;
 };
 
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {

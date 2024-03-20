@@ -15,8 +15,6 @@ interface PerformanceEvaluatingScreenProps {
     onChange: (value: Model) => void;
   };
   performanceEvaluator: PerformanceEvaluator;
-  loadingData: boolean;
-  loadingModel: boolean;
   modelLoadError: string | null;
 }
 const PerformanceEvaluatingScreen = (
@@ -65,6 +63,13 @@ const PerformanceEvaluatingScreen = (
           />
         </>
       )}
+
+      {props.performanceEvaluator.loadingData && <Text>Loading data...</Text>}
+      {props.performanceEvaluator.runError && (
+        <Text style={{ color: 'red' }}>
+          Run Error: {props.performanceEvaluator.runError}
+        </Text>
+      )}
       <Button
         title="Run inference"
         onPress={async () => {
@@ -72,10 +77,11 @@ const PerformanceEvaluatingScreen = (
         }}
         disabled={
           props.performanceEvaluator.running ||
-          props.loadingData ||
-          props.loadingModel
+          props.performanceEvaluator.loadingData ||
+          props.performanceEvaluator.loadingModel
         }
       />
+
       {props.modelLoadError && (
         <Text style={{ color: 'red' }}>{props.modelLoadError}</Text>
       )}
