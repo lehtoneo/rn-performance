@@ -56,7 +56,7 @@ const Onnx = () => {
       }
     },
     data: usedData || null,
-    validateResult: (o) => {
+    validateResult: async (o) => {
       if (modelType === 'mobilenet') {
         const t2 = onnxRuntime.model?.outputNames[0] || '';
         const t = o.result[t2] as any;

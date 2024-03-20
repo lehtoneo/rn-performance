@@ -4,14 +4,8 @@ import { Platform } from 'react-native';
 
 import { localIP } from './dataService';
 
-import { Model } from '../hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
-
-type SendResultCommonOptions = {
-  library: string;
-  precision: ModelInputPrecision;
-};
-
 type SendResultsCommonOpts<T> = {
+  resultsId: string;
   inputIndex: number;
   precision: ModelInputPrecision;
   library: string;
@@ -21,14 +15,12 @@ type SendResultsCommonOpts<T> = {
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
   try {
     const d = {
+      ...opts,
       platform: Platform.OS,
-      library: opts.library,
-      frameWork: 'react-native',
-      results: opts.results,
-      precision: opts.precision,
-      inputIndex: opts.inputIndex
+      frameWork: 'react-native'
     };
-    await axios.post(`${uri}`, d);
+    const r = await axios.post(`${uri}`, d);
+    return r.data;
   } catch (e) {
     console.log(e);
     console.log('error');
@@ -40,7 +32,29 @@ const createResultService = (uri: string) => {
 
   const sendImageNetResults = async (opts: SendResultsCommonOpts<number[]>) => {
     try {
-      await sendResults(`${baseUrl}/imagenet`, opts);
+      return await sendResults(`${baseUrl}/imagenet`, opts);
+    } catch (e) {
+      console.log(e);
+      console.log('error');
+    }
+  };
+
+  const sendSSDMobilenetResults = async (
+    opts: SendResultsCommonOpts<[number[], number[], number[], number[]]>
+  ) => {
+    try {
+      return await sendResults(`${baseUrl}/ssd-mobilenet`, opts);
+    } catch (e) {
+      console.log(e);
+      console.log('error');
+    }
+  };
+
+  const sendDeeplabv3Results = async (
+    opts: SendResultsCommonOpts<number[]>
+  ) => {
+    try {
+      return await sendResults(`${baseUrl}/deeplabv3`, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
@@ -48,7 +62,9 @@ const createResultService = (uri: string) => {
   };
 
   return {
-    sendImageNetResults
+    sendImageNetResults,
+    sendSSDMobilenetResults,
+    sendDeeplabv3Results
   };
 };
 

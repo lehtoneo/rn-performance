@@ -53,8 +53,15 @@ export default function App(): React.ReactNode {
         }
       : null,
     validateResult: async (o) => {
+      const commonInputs = {
+        inputIndex: o.index,
+        precision: modelInputPrecision,
+        library: 'fast-tf-lite',
+        resultsId: 'fast-tf-lite'
+      };
       if (model === 'mobilenet') {
         const typedResult = o.result[0];
+        console.log({ o });
         const t = o.result[0] as unknown as number[];
         // need to do the conversion because the result is a TypedArray
         let numberArray: number[] = [];
@@ -62,15 +69,38 @@ export default function App(): React.ReactNode {
           const curr = typedResult[i];
           numberArray.push(new Number(curr).valueOf());
         }
-        await resultService.sendImageNetResults({
-          inputIndex: o.index,
-          precision: modelInputPrecision,
-          library: 'fast-tf-lite',
+        const t2 = await resultService.sendImageNetResults({
+          ...commonInputs,
           results: numberArray
         });
-        return validationUtil.validateMobileNet({
-          result: numberArray,
-          index: o.index
+
+        return t2.correct === true;
+      } else if (model === 'ssd_mobilenet') {
+        const typedResult = o.result;
+
+        let result: [number[], number[], number[], number[]] = [[], [], [], []];
+        typedResult.forEach((r, index) => {
+          for (let i = 0; i < r.length; i++) {
+            const curr = r[i];
+            result[index].push(new Number(curr).valueOf());
+          }
+        });
+
+        await resultService.sendSSDMobilenetResults({
+          ...commonInputs,
+          results: result
+        });
+      } else if (model === 'deeplabv3') {
+        const typedResult = o.result[0];
+
+        let results: number[] = [];
+        for (let i = 0; i < typedResult.length; i++) {
+          const curr = typedResult[i];
+          results.push(new Number(curr).valueOf());
+        }
+        await resultService.sendDeeplabv3Results({
+          ...commonInputs,
+          results: results
         });
       }
 
