@@ -62,7 +62,7 @@ const useOnnxRuntime = (opts: {
   console.log(model?.inputNames);
 
   return {
-    model: model,
+    model: modelRef.current,
     modelLoadError
   };
 };

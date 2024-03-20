@@ -20,13 +20,13 @@ import { ModelInputPrecision } from '@/lib/types';
 import validationUtil from '@/lib/util/validationUtil';
 
 const Onnx = () => {
-  const [modelType, setModelType] = useState<Model>('mobilenet');
+  const [modelType, setModelType] = useState<Model>('ssd_mobilenet');
 
   const [executionProvider, setExecutionProvider] =
     useState<OnnxRuntimeExecutionProvider>(OnnxRuntimeExecutionProvider.COREML);
 
   const [modelInputPrecision, setModelInputPrecision] =
-    useState<ModelInputPrecision>('uint8');
+    useState<ModelInputPrecision>('float32');
 
   const inputDimensions = useModelDataDimensions(modelType);
 

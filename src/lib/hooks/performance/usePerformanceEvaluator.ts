@@ -29,7 +29,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
   >([]);
   const [running, setRunning] = useState(false);
   const [accuracy, setAccuracy] = useState(0);
-  const [runError, setRunError] = useState<string | null>(null);
+  const [runErrors, setRunErrors] = useState<string[]>([]);
 
   // needs to be different function
   const runPredictions = async () => {
@@ -45,15 +45,15 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
       return;
     }
     setRunning(true);
-    setRunError(null);
+    setRunErrors([]);
     let i = 0;
     let correct = 0;
     let total = 0;
     let results = [];
     while (i < opts.data.length) {
       const data = opts.data[i];
+
       try {
-        console.log({ i });
         const r = await perfUtil.createAsyncPerformanceTest({
           name: 'run',
           fn: async () => {
@@ -73,9 +73,14 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
           }
         }
       } catch (e: any) {
-        setRunError(e.message);
-        setRunning(false);
-        return;
+        console.log('INFERENCE ERROR');
+        let ss: any =
+          total > 0 ? results.reduce((a, b) => a + b.time, 0) / total : 0;
+        results.push({ time: ss, index: i });
+        setRunErrors((prev) => [
+          ...prev,
+          `ERROR RUNNING MODEL with DATA INDEX ${i} ${e.message}`
+        ]);
       }
 
       total++;
@@ -104,7 +109,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     accuracy,
     loadingData: !opts.data,
     loadingModel: !opts.mlModel,
-    runError
+    runErrors
   };
 }
 

@@ -65,11 +65,21 @@ const PerformanceEvaluatingScreen = (
       )}
 
       {props.performanceEvaluator.loadingData && <Text>Loading data...</Text>}
-      {props.performanceEvaluator.runError && (
-        <Text style={{ color: 'red' }}>
-          Run Error: {props.performanceEvaluator.runError}
-        </Text>
-      )}
+
+      <View>
+        {props.performanceEvaluator.runErrors.length > 0 && (
+          <Text style={{ color: 'red', fontSize: 18, fontWeight: 'bold' }}>
+            Errors
+          </Text>
+        )}
+        {props.performanceEvaluator.runErrors.map((e) => {
+          return (
+            <Text key={e} style={{ color: 'red' }}>
+              {e}
+            </Text>
+          );
+        })}
+      </View>
       <Button
         title="Run inference"
         onPress={async () => {
