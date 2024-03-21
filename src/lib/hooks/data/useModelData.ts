@@ -46,7 +46,12 @@ function useModelData(opts: {
   const d = useQuery({
     queryKey: [
       'model-data',
-      { dataPrecision: opts.dataPrecision, fn: fetchFn, model: opts.model }
+      {
+        dataPrecision: opts.dataPrecision,
+        fn: fetchFn,
+        model: opts.model,
+        amount: maxAmount
+      }
     ],
     queryFn: async () => {
       let i = 0;

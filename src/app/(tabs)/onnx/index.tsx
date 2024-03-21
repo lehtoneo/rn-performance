@@ -2,7 +2,7 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 import RadioGroup from '@/components/tests/radio-group';
@@ -39,7 +39,7 @@ const Onnx = () => {
   const d = useModelData({
     dataPrecision: modelInputPrecision,
     model: modelType,
-    maxAmount: 20
+    maxAmount: 200
   });
 
   const usedData = onnxRuntime.model
@@ -65,6 +65,12 @@ const Onnx = () => {
     },
     data: usedData || null,
     validateResult: async (o) => {
+      const common = {
+        inputIndex: o.index,
+        precision: modelInputPrecision,
+        library: 'onnxruntime',
+        resultsId: 'onnxruntime'
+      };
       if (modelType === 'mobilenet') {
         const t2 = onnxRuntime.model?.outputNames[0] || '';
         const t = o.result[t2] as any;
@@ -74,14 +80,30 @@ const Onnx = () => {
           numberArray.push(new Number(d[i]).valueOf());
         }
         const r = await resultService.sendImageNetResults({
+          ...common,
           results: numberArray,
-          inputIndex: o.index,
-          precision: modelInputPrecision,
-          library: 'onnxruntime',
-          resultsId: 'onnxruntime',
           inferenceTimeMs: o.timeMs
         });
-        return r.correct === true;
+        return r?.correct === true;
+      }
+
+      if (modelType === 'ssd_mobilenet') {
+        let results: any = [];
+        onnxRuntime.model!.outputNames.forEach((name, index) => {
+          const t = o.result[name] as any;
+          const d = t.cpuData as number[];
+          let numberArray = [];
+          for (let i = 0; i < d.length; i++) {
+            numberArray.push(new Number(d[i]).valueOf());
+          }
+          results.push(numberArray);
+        });
+        const r = await resultService.sendSSDMobilenetResults({
+          ...common,
+          results: results,
+          inferenceTimeMs: o.timeMs
+        });
+        return r?.correct === true;
       }
       return false;
     },
@@ -94,39 +116,41 @@ const Onnx = () => {
 
   return (
     <View style={styles.container}>
-      {onnxRuntime.modelLoadError && (
-        <Text
-          style={{
-            color: 'red'
-          }}
-        >
-          Error loading model: {onnxRuntime.modelLoadError}
-        </Text>
-      )}
+      <ScrollView>
+        {onnxRuntime.modelLoadError && (
+          <Text
+            style={{
+              color: 'red'
+            }}
+          >
+            Error loading model: {onnxRuntime.modelLoadError}
+          </Text>
+        )}
 
-      <Text>Exection Provider</Text>
-      <RadioGroup<OnnxRuntimeExecutionProvider>
-        options={t.map((v) => {
-          return {
-            value: v,
-            label: v
-          };
-        })}
-        value={executionProvider}
-        onChange={(value) => setExecutionProvider(value)}
-      />
-      <PerformanceEvaluatingScreen
-        modelTypeProps={{
-          value: modelType,
-          onChange: setModelType
-        }}
-        modelInputPrecisionProps={{
-          value: modelInputPrecision,
-          onChange: setModelInputPrecision
-        }}
-        performanceEvaluator={ttt}
-        modelLoadError={null}
-      />
+        <Text>Exection Provider</Text>
+        <RadioGroup<OnnxRuntimeExecutionProvider>
+          options={t.map((v) => {
+            return {
+              value: v,
+              label: v
+            };
+          })}
+          value={executionProvider}
+          onChange={(value) => setExecutionProvider(value)}
+        />
+        <PerformanceEvaluatingScreen
+          modelTypeProps={{
+            value: modelType,
+            onChange: setModelType
+          }}
+          modelInputPrecisionProps={{
+            value: modelInputPrecision,
+            onChange: setModelInputPrecision
+          }}
+          performanceEvaluator={ttt}
+          modelLoadError={null}
+        />
+      </ScrollView>
     </View>
   );
 };

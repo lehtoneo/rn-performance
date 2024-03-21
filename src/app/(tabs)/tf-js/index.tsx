@@ -6,12 +6,14 @@ import { Button, Text, View } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 
+import { tfJSMobileNetUtil } from './util/mobilenet';
 import useModelData, {
   useModelDataDimensions
 } from '@/lib/hooks/data/useModelData';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useTfjsML from '@/lib/hooks/ml/tfjs/useTfjs';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import { resultService } from '@/lib/services/resultService';
 import { ModelInputPrecision } from '@/lib/types';
 
 const TfJs = () => {
@@ -22,7 +24,7 @@ const TfJs = () => {
   const { data } = useModelData({
     dataPrecision: 'int32',
     model: modelType,
-    maxAmount: 20
+    maxAmount: 300
   });
 
   const tfjs = useTfjsML();
@@ -39,6 +41,20 @@ const TfJs = () => {
           }
         }
       : null,
+    validateResult: async (o) => {
+      const t = tfJSMobileNetUtil.classToIndex(o.result[0].className);
+      let result = new Array(1000).fill(0);
+      result[t + 1] = 1;
+      const r = await resultService.sendImageNetResults({
+        output: result,
+        library: 'tfjs',
+        precision: 'uint8',
+        resultsId: 'mobilenet',
+        inferenceTimeMs: o.timeMs,
+        inputIndex: o.index
+      });
+      return r?.correct === true;
+    },
     data: usedData || null
   });
 
@@ -50,6 +66,10 @@ const TfJs = () => {
           }
         }
       : null,
+    validateResult: async (o) => {
+      console.log(o.result);
+      return false;
+    },
     data: usedData || null
   });
 

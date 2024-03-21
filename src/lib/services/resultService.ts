@@ -1,16 +1,20 @@
 import { ModelInputPrecision } from '../types';
 import axios from 'axios';
+import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 
 import { localIP } from './dataService';
+
+import { Model } from '../hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 
 type SendResultsCommonOpts<T> = {
   resultsId: string;
   inputIndex: number;
   precision: ModelInputPrecision;
   library: string;
-  results: T;
+  output: T;
   inferenceTimeMs: number;
+  model: Model;
 };
 
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
@@ -18,9 +22,10 @@ const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
     const d = {
       ...opts,
       platform: Platform.OS,
+      deviceModelName: Device.modelName,
       frameWork: 'react-native'
     };
-    const r = await axios.post(`${uri}`, d);
+    const r = await axios.post<{ correct: boolean }>(`${uri}`, d);
     return r.data;
   } catch (e) {
     console.log(e);

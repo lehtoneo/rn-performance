@@ -16,6 +16,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     result: T2;
     index: number;
     timeMs: number;
+    runId: string;
   }) => Promise<boolean>;
   options?: {
     logResults?: boolean;
@@ -44,6 +45,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
       console.warn('No mlModel, cannot run predictions');
       return;
     }
+    const runID = `run-${new Date().getTime()}`;
     setRunning(true);
     setRunErrors([]);
     let i = 0;
@@ -66,7 +68,8 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
             await opts.validateResult({
               result: r.fnResult,
               index: i,
-              timeMs: r.time
+              timeMs: r.time,
+              runId: runID
             })
           ) {
             correct++;

@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   ActivityIndicator,
   Button,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -59,7 +60,7 @@ export default function App(): React.ReactNode {
         inputIndex: o.index,
         precision: modelInputPrecision,
         library: 'fast-tf-lite',
-        resultsId: 'fast-tf-lite',
+        resultsId: o.runId,
         inferenceTimeMs: o.timeMs
       };
       if (model === 'mobilenet') {
@@ -74,10 +75,11 @@ export default function App(): React.ReactNode {
         }
         const t2 = await resultService.sendImageNetResults({
           ...commonInputs,
-          results: numberArray
+          model: 'mobilenet',
+          output: numberArray
         });
 
-        return t2.correct === true;
+        return t2?.correct === true;
       } else if (model === 'ssd_mobilenet') {
         const typedResult = o.result;
 
@@ -89,10 +91,12 @@ export default function App(): React.ReactNode {
           }
         });
 
-        await resultService.sendSSDMobilenetResults({
+        const r = await resultService.sendSSDMobilenetResults({
           ...commonInputs,
-          results: result
+          model: model,
+          output: result
         });
+        return r?.correct === true;
       } else if (model === 'deeplabv3') {
         const typedResult = o.result[0];
 
@@ -103,7 +107,8 @@ export default function App(): React.ReactNode {
         }
         await resultService.sendDeeplabv3Results({
           ...commonInputs,
-          results: results
+          model: 'deeplabv3',
+          output: results
         });
       }
 
@@ -114,36 +119,38 @@ export default function App(): React.ReactNode {
 
   return (
     <View style={styles.container}>
-      <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
-        <View>
-          <Text>See results</Text>
-        </View>
-      </Link>
+      <ScrollView>
+        <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
+          <View>
+            <Text>See results</Text>
+          </View>
+        </Link>
 
-      <Text>Delegate</Text>
-      <RadioGroup<FastTFLiteModelDelegate>
-        options={Object.values(FastTFLiteModelDelegate).map((v) => {
-          return {
-            value: v,
-            label: v
-          };
-        })}
-        value={delegate}
-        onChange={(value) => setDelegate(value)}
-      />
+        <Text>Delegate</Text>
+        <RadioGroup<FastTFLiteModelDelegate>
+          options={Object.values(FastTFLiteModelDelegate).map((v) => {
+            return {
+              value: v,
+              label: v
+            };
+          })}
+          value={delegate}
+          onChange={(value) => setDelegate(value)}
+        />
 
-      <PerformanceEvaluatingScreen
-        modelTypeProps={{
-          value: model,
-          onChange: setModel
-        }}
-        modelLoadError={fastTfLite.error ? 'Error loading model' : null}
-        performanceEvaluator={perfEvaluator}
-        modelInputPrecisionProps={{
-          value: modelInputPrecision,
-          onChange: setModelInputPrecision
-        }}
-      />
+        <PerformanceEvaluatingScreen
+          modelTypeProps={{
+            value: model,
+            onChange: setModel
+          }}
+          modelLoadError={fastTfLite.error ? 'Error loading model' : null}
+          performanceEvaluator={perfEvaluator}
+          modelInputPrecisionProps={{
+            value: modelInputPrecision,
+            onChange: setModelInputPrecision
+          }}
+        />
+      </ScrollView>
     </View>
   );
 }
