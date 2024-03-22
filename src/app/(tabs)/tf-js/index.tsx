@@ -49,9 +49,11 @@ const TfJs = () => {
         output: result,
         library: 'tfjs',
         precision: 'uint8',
-        resultsId: 'mobilenet',
+        resultsId: o.runId,
         inferenceTimeMs: o.timeMs,
-        inputIndex: o.index
+        inputIndex: o.index,
+        model: modelType,
+        delegate: 'webgl'
       });
       return r?.correct === true;
     },

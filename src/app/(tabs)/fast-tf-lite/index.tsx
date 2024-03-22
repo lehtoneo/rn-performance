@@ -22,9 +22,6 @@ import useReactNativeFastTfLite, {
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { resultService } from '@/lib/services/resultService';
 import { ModelInputPrecision } from '@/lib/types';
-import { imageNetLabels } from '@/lib/util/imagenet_labels';
-import { perfUtil } from '@/lib/util/performance';
-import validationUtil from '@/lib/util/validationUtil';
 
 export default function App(): React.ReactNode {
   const [modelInputPrecision, setModelInputPrecision] =
@@ -33,17 +30,17 @@ export default function App(): React.ReactNode {
     FastTFLiteModelDelegate.DEFAULT
   );
 
-  const [model, setModel] = React.useState<Model>('mobilenet');
+  const [model, setModel] = React.useState<Model>('ssd_mobilenet');
 
   const fastTfLite = useReactNativeFastTfLite({
     model: model,
     type: modelInputPrecision,
     delegate: delegate
   });
-  const imagenet = useModelData({
+  const modelData = useModelData({
     dataPrecision: modelInputPrecision,
     model: model,
-    maxAmount: 20
+    maxAmount: 300
   });
 
   const perfEvaluator = useMLPerformanceEvaluator({
@@ -61,9 +58,11 @@ export default function App(): React.ReactNode {
         precision: modelInputPrecision,
         library: 'fast-tf-lite',
         resultsId: o.runId,
-        inferenceTimeMs: o.timeMs
+        inferenceTimeMs: o.timeMs,
+        model: model,
+        delegate: delegate
       };
-      if (model === 'mobilenet') {
+      if (model === 'mobilenet' || model === 'mobilenet_edgetpu') {
         const typedResult = o.result[0];
         console.log({ o });
         const t = o.result[0] as unknown as number[];
@@ -75,7 +74,6 @@ export default function App(): React.ReactNode {
         }
         const t2 = await resultService.sendImageNetResults({
           ...commonInputs,
-          model: 'mobilenet',
           output: numberArray
         });
 
@@ -93,7 +91,6 @@ export default function App(): React.ReactNode {
 
         const r = await resultService.sendSSDMobilenetResults({
           ...commonInputs,
-          model: model,
           output: result
         });
         return r?.correct === true;
@@ -107,14 +104,13 @@ export default function App(): React.ReactNode {
         }
         await resultService.sendDeeplabv3Results({
           ...commonInputs,
-          model: 'deeplabv3',
           output: results
         });
       }
 
       return false;
     },
-    data: imagenet.data?.map((d) => [d.array]) || null
+    data: modelData.data?.map((d) => [d.array]) || null
   });
 
   return (

@@ -15,6 +15,7 @@ type SendResultsCommonOpts<T> = {
   output: T;
   inferenceTimeMs: number;
   model: Model;
+  delegate: 'cpu' | 'nnapi' | 'metal' | 'core-ml' | 'webgl';
 };
 
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {

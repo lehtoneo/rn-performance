@@ -36,8 +36,9 @@ const getArray = (precision: DataPrecision, data: number[]) => {
     case 'uint8':
       return new Uint8Array(data);
     case 'float32':
+      // convert them to -1 to 1
       const asFloat32 = data.map((d) => {
-        return d / 255;
+        return 0.007874015718698502 * (d - 128);
       });
       return new Float32Array(asFloat32);
   }

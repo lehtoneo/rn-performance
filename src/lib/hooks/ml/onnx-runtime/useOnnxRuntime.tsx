@@ -7,6 +7,10 @@ import { ModelInputPrecision } from '@/lib/types';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
   mobilenet: {
+    uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_uint8.tflite'),
+    float32: require('../../../../../assets/models/mlperf/onnx/mobilenetv2_float32.onnx')
+  },
+  mobilenet_edgetpu: {
     uint8: require('../../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_uint8.onnx'),
     float32: require('../../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_float32.onnx')
   },
@@ -23,7 +27,7 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
 export enum OnnxRuntimeExecutionProvider {
   NNAPI = 'nnapi',
   CPU = 'cpu',
-  COREML = 'coreml'
+  COREML = 'core-ml'
 }
 
 const useOnnxRuntime = (opts: {
@@ -48,7 +52,11 @@ const useOnnxRuntime = (opts: {
       }
       try {
         const session = await InferenceSession.create(asset.localUri!, {
-          executionProviders: [opts.executionProvider]
+          executionProviders: [
+            opts.executionProvider === OnnxRuntimeExecutionProvider.COREML
+              ? 'coreml'
+              : opts.executionProvider
+          ]
         });
         modelRef.current = session;
         setModel(session);

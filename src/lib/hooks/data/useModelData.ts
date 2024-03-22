@@ -13,6 +13,8 @@ export const useModelDataDimensions = (
   switch (model) {
     case 'mobilenet':
       return [224, 224, 3];
+    case 'mobilenet_edgetpu':
+      return [224, 224, 3];
     case 'ssd_mobilenet':
       return [300, 300, 3];
     case 'deeplabv3':
@@ -25,6 +27,8 @@ export const useModelDataDimensions = (
 const getFetchFn = (model: Model) => {
   switch (model) {
     case 'mobilenet':
+      return dataService.fetchImageNetData;
+    case 'mobilenet_edgetpu':
       return dataService.fetchImageNetData;
     case 'ssd_mobilenet':
       return dataService.fetchCocoData;

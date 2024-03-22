@@ -8,10 +8,18 @@ import {
 
 import { ModelInputPrecision } from '@/lib/types';
 
-export type Model = 'mobilenet' | 'ssd_mobilenet' | 'deeplabv3';
+export type Model =
+  | 'mobilenet'
+  | 'mobilenet_edgetpu'
+  | 'ssd_mobilenet'
+  | 'deeplabv3';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
   mobilenet: {
+    uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_uint8.tflite'),
+    float32: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_float32.tflite')
+  },
+  mobilenet_edgetpu: {
     uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_uint8.tflite'),
     float32: require('../../../../../assets/models/mlperf/tf-lite/mobilenet_edgetpu_224_1.0_float32.tflite')
   },
@@ -26,7 +34,7 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
 };
 
 export enum FastTFLiteModelDelegate {
-  DEFAULT = 'default',
+  DEFAULT = 'webgl',
   CoreML = 'core-ml',
   METAL = 'metal'
 }
@@ -38,7 +46,9 @@ const useReactNativeFastTfLite = (opts: {
 }) => {
   const model = useTensorflowModel(
     models[opts.model][opts.type],
-    opts.delegate
+    opts.delegate === FastTFLiteModelDelegate.DEFAULT
+      ? 'default'
+      : opts.delegate
   );
 
   React.useEffect(() => {

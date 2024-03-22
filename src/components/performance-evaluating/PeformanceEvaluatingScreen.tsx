@@ -30,6 +30,10 @@ const PerformanceEvaluatingScreen = (
             value: 'mobilenet'
           },
           {
+            label: 'mobilenet_edgetpu',
+            value: 'mobilenet_edgetpu'
+          },
+          {
             label: 'ssd_mobilenet',
             value: 'ssd_mobilenet'
           },

@@ -10,18 +10,21 @@ import {
 } from 'react-native';
 
 import useModelData from '@/lib/hooks/data/useModelData';
-import useReactNativeFastTfLite from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
+import useReactNativeFastTfLite, {
+  FastTFLiteModelDelegate,
+  Model
+} from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import { imageNetLabels } from '@/lib/util/imagenet_labels';
 
 export default function App(): React.ReactNode {
   const [predictions, setPredictions] = React.useState<string[]>([]);
   const t = useReactNativeFastTfLite({
-    model: 'mobilenet',
+    model: 'mobilenet_edgetpu',
     type: 'uint8',
-    delegate: 'core-ml'
+    delegate: FastTFLiteModelDelegate.CoreML
   });
   const d = useModelData({
-    model: 'mobilenet',
+    model: 'ssd_mobilenet',
     dataPrecision: 'uint8',
     maxAmount: 30
   });

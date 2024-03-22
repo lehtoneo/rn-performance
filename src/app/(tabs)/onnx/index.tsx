@@ -20,7 +20,7 @@ import { ModelInputPrecision } from '@/lib/types';
 import validationUtil from '@/lib/util/validationUtil';
 
 const Onnx = () => {
-  const [modelType, setModelType] = useState<Model>('ssd_mobilenet');
+  const [modelType, setModelType] = useState<Model>('mobilenet_edgetpu');
 
   const [executionProvider, setExecutionProvider] =
     useState<OnnxRuntimeExecutionProvider>(OnnxRuntimeExecutionProvider.COREML);
@@ -39,7 +39,7 @@ const Onnx = () => {
   const d = useModelData({
     dataPrecision: modelInputPrecision,
     model: modelType,
-    maxAmount: 200
+    maxAmount: 300
   });
 
   const usedData = onnxRuntime.model
@@ -69,9 +69,9 @@ const Onnx = () => {
         inputIndex: o.index,
         precision: modelInputPrecision,
         library: 'onnxruntime',
-        resultsId: 'onnxruntime'
+        resultsId: o.runId
       };
-      if (modelType === 'mobilenet') {
+      if (modelType === 'mobilenet_edgetpu') {
         const t2 = onnxRuntime.model?.outputNames[0] || '';
         const t = o.result[t2] as any;
         const d = t.cpuData as number[];
@@ -81,8 +81,10 @@ const Onnx = () => {
         }
         const r = await resultService.sendImageNetResults({
           ...common,
-          results: numberArray,
-          inferenceTimeMs: o.timeMs
+          output: numberArray,
+          inferenceTimeMs: o.timeMs,
+          model: modelType,
+          delegate: executionProvider
         });
         return r?.correct === true;
       }
@@ -100,8 +102,10 @@ const Onnx = () => {
         });
         const r = await resultService.sendSSDMobilenetResults({
           ...common,
-          results: results,
-          inferenceTimeMs: o.timeMs
+          output: results,
+          inferenceTimeMs: o.timeMs,
+          model: modelType,
+          delegate: executionProvider
         });
         return r?.correct === true;
       }
