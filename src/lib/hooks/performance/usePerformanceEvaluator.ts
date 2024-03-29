@@ -63,17 +63,25 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
           }
         });
         results.push({ ...r, index: i });
-        if (opts.validateResult) {
-          if (
-            await opts.validateResult({
-              result: r.fnResult,
-              index: i,
-              timeMs: r.time,
-              runId: runID
-            })
-          ) {
-            correct++;
+        try {
+          if (opts.validateResult) {
+            if (
+              await opts.validateResult({
+                result: r.fnResult,
+                index: i,
+                timeMs: r.time,
+                runId: runID
+              })
+            ) {
+              correct++;
+            }
           }
+        } catch (e: any) {
+          console.log('VALIDATION ERROR');
+          setRunErrors((prev) => [
+            ...prev,
+            `ERROR VALIDATING RESULT with DATA INDEX ${i} ${e.message}`
+          ]);
         }
       } catch (e: any) {
         console.log('INFERENCE ERROR');

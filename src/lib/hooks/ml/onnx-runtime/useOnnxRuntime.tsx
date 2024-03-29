@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ModelInputPrecision } from '@/lib/types';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
-  mobilenet: {
-    uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_uint8.tflite'),
+  mobilenetv2: {
+    uint8: require('../../../../../assets/models/mlperf/onnx/mobilenetv2_uint8.onnx'),
     float32: require('../../../../../assets/models/mlperf/onnx/mobilenetv2_float32.onnx')
   },
   mobilenet_edgetpu: {
@@ -27,7 +27,7 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
 export enum OnnxRuntimeExecutionProvider {
   NNAPI = 'nnapi',
   CPU = 'cpu',
-  COREML = 'core-ml'
+  COREML = 'core_ml'
 }
 
 const useOnnxRuntime = (opts: {

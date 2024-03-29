@@ -15,7 +15,7 @@ type SendResultsCommonOpts<T> = {
   output: T;
   inferenceTimeMs: number;
   model: Model;
-  delegate: 'cpu' | 'nnapi' | 'metal' | 'core-ml' | 'webgl';
+  delegate: 'cpu' | 'nnapi' | 'metal' | 'core_ml' | 'webgl' | 'opengl';
 };
 
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
@@ -37,9 +37,11 @@ const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
 const createResultService = (uri: string) => {
   const baseUrl = `${uri}/results`;
 
-  const sendImageNetResults = async (opts: SendResultsCommonOpts<number[]>) => {
+  const sendMobileNetResults = async (
+    opts: SendResultsCommonOpts<number[]>
+  ) => {
     try {
-      return await sendResults(`${baseUrl}/imagenet`, opts);
+      return await sendResults(`${baseUrl}/mobilenet`, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
@@ -58,7 +60,7 @@ const createResultService = (uri: string) => {
   };
 
   const sendDeeplabv3Results = async (
-    opts: SendResultsCommonOpts<number[]>
+    opts: SendResultsCommonOpts<number[] | number[][]>
   ) => {
     try {
       return await sendResults(`${baseUrl}/deeplabv3`, opts);
@@ -69,7 +71,7 @@ const createResultService = (uri: string) => {
   };
 
   return {
-    sendImageNetResults,
+    sendImageNetResults: sendMobileNetResults,
     sendSSDMobilenetResults,
     sendDeeplabv3Results
   };

@@ -87,7 +87,7 @@ const TfJs = () => {
   });
 
   const usedEvaluator =
-    modelType === 'mobilenet'
+    modelType === 'mobilenetv2'
       ? mobileNetEvaluator
       : modelType === 'ssd_mobilenet'
         ? ssdMobilenetEvaluator

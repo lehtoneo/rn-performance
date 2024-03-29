@@ -44,7 +44,6 @@ const Onnx = () => {
 
   const usedData = onnxRuntime.model
     ? d.data?.map((d) => {
-        const imgWidth = modelType === 'mobilenet' ? 224 : 300;
         const tensorA = new ort.Tensor(modelInputPrecision, d.array, [
           1,
           ...inputDimensions
@@ -71,7 +70,7 @@ const Onnx = () => {
         library: 'onnxruntime',
         resultsId: o.runId
       };
-      if (modelType === 'mobilenet_edgetpu') {
+      if (modelType === 'mobilenet_edgetpu' || modelType === 'mobilenetv2') {
         const t2 = onnxRuntime.model?.outputNames[0] || '';
         const t = o.result[t2] as any;
         const d = t.cpuData as number[];

@@ -26,8 +26,8 @@ const PerformanceEvaluatingScreen = (
       <RadioGroup<Model>
         options={[
           {
-            label: 'mobilenet',
-            value: 'mobilenet'
+            label: 'mobilenetv2',
+            value: 'mobilenetv2'
           },
           {
             label: 'mobilenet_edgetpu',

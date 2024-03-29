@@ -9,13 +9,13 @@ import {
 import { ModelInputPrecision } from '@/lib/types';
 
 export type Model =
-  | 'mobilenet'
+  | 'mobilenetv2'
   | 'mobilenet_edgetpu'
   | 'ssd_mobilenet'
   | 'deeplabv3';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
-  mobilenet: {
+  mobilenetv2: {
     uint8: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_uint8.tflite'),
     float32: require('../../../../../assets/models/mlperf/tf-lite/mobilenetv2_float32.tflite')
   },
@@ -34,8 +34,8 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
 };
 
 export enum FastTFLiteModelDelegate {
-  DEFAULT = 'webgl',
-  CoreML = 'core-ml',
+  DEFAULT = 'opengl',
+  CoreML = 'core_ml',
   METAL = 'metal'
 }
 
@@ -48,7 +48,9 @@ const useReactNativeFastTfLite = (opts: {
     models[opts.model][opts.type],
     opts.delegate === FastTFLiteModelDelegate.DEFAULT
       ? 'default'
-      : opts.delegate
+      : opts.delegate === FastTFLiteModelDelegate.CoreML
+        ? 'core-ml'
+        : 'metal'
   );
 
   React.useEffect(() => {

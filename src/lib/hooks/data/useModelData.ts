@@ -8,10 +8,10 @@ import dataService, {
 import { ModelInputPrecision } from '@/lib/types';
 
 export const useModelDataDimensions = (
-  model: Model
+  model?: Model
 ): [number, number, number] => {
   switch (model) {
-    case 'mobilenet':
+    case 'mobilenetv2':
       return [224, 224, 3];
     case 'mobilenet_edgetpu':
       return [224, 224, 3];
@@ -19,6 +19,8 @@ export const useModelDataDimensions = (
       return [300, 300, 3];
     case 'deeplabv3':
       return [512, 512, 3];
+    case undefined:
+      return [0, 0, 0];
     default:
       throw new Error('Invalid model');
   }
@@ -26,7 +28,7 @@ export const useModelDataDimensions = (
 
 const getFetchFn = (model: Model) => {
   switch (model) {
-    case 'mobilenet':
+    case 'mobilenetv2':
       return dataService.fetchImageNetData;
     case 'mobilenet_edgetpu':
       return dataService.fetchImageNetData;
