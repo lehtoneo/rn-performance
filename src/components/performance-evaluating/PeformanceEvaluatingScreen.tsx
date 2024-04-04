@@ -87,7 +87,7 @@ const PerformanceEvaluatingScreen = (
       <Button
         title="Run inference"
         onPress={async () => {
-          await props.performanceEvaluator.runPredictions();
+          await props.performanceEvaluator.runPredictions(5);
         }}
         disabled={
           props.performanceEvaluator.running ||

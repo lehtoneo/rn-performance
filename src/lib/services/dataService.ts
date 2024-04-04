@@ -29,22 +29,30 @@ type FetchImagesQueryData = {
   };
 };
 
-const getArray = (precision: DataPrecision, data: number[]) => {
+interface GetArrayOpts {
+  precision: DataPrecision;
+  data: number[];
+  formatFloat32fn: (data: number) => number;
+}
+
+const getArray = (opts: GetArrayOpts) => {
+  const { precision, data } = opts;
   switch (precision) {
     case 'int32':
       return new Int32Array(data);
     case 'uint8':
       return new Uint8Array(data);
     case 'float32':
-      // convert them to -1 to 1
-      const asFloat32 = data.map((d) => {
-        return 0.007874015718698502 * (d - 128);
-      });
+      const asFloat32 = data.map(opts.formatFloat32fn);
       return new Float32Array(asFloat32);
   }
 };
 
-const fetchImages = async (query: FetchImagesQuery, path: string) => {
+const fetchImages = async (
+  query: FetchImagesQuery,
+  path: string,
+  opts?: FetchImagesOpts
+) => {
   const response = await axios.get<FetchImagesQueryData[]>(
     `${baseDataUrl}/${path}`,
     {
@@ -54,8 +62,11 @@ const fetchImages = async (query: FetchImagesQuery, path: string) => {
 
   const data = response.data.map((d) => {
     const buffer = Buffer.from(d.buffer.data);
-
-    const array = getArray(query.type, d.rawImageBuffer.data);
+    const array = getArray({
+      precision: query.type,
+      data: d.rawImageBuffer.data,
+      formatFloat32fn: opts?.formatFloat32fn || ((d) => d)
+    });
     const base64 = buffer.toString('base64');
     return {
       id: d.id,
@@ -68,6 +79,10 @@ const fetchImages = async (query: FetchImagesQuery, path: string) => {
   return data;
 };
 
+interface FetchImagesOpts {
+  formatFloat32fn: (data: number) => number;
+}
+
 /**
  * - Create a data service object
  * @returns - A data service object
@@ -76,16 +91,25 @@ export const createDataService = () => {
   /**
    * - Fetch ImageNet data
    */
-  const fetchImageNetData = async (query: FetchImagesQuery) => {
-    return await fetchImages(query, 'imageNet');
+  const fetchImageNetData = async (
+    query: FetchImagesQuery,
+    opts: FetchImagesOpts
+  ) => {
+    return await fetchImages(query, 'imageNet', opts);
   };
 
-  const fetchCocoData = async (query: FetchImagesQuery) => {
-    return await fetchImages(query, 'coco');
+  const fetchCocoData = async (
+    query: FetchImagesQuery,
+    opts?: FetchImagesOpts
+  ) => {
+    return await fetchImages(query, 'coco', opts);
   };
 
-  const fetckAde20kData = async (query: FetchImagesQuery) => {
-    return await fetchImages(query, 'ade20k');
+  const fetckAde20kData = async (
+    query: FetchImagesQuery,
+    opts?: FetchImagesOpts
+  ) => {
+    return await fetchImages(query, 'ade20k', opts);
   };
 
   return {

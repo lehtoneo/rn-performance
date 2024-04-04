@@ -27,7 +27,8 @@ const models: Record<Model, Record<ModelInputPrecision, any>> = {
 export enum OnnxRuntimeExecutionProvider {
   NNAPI = 'nnapi',
   CPU = 'cpu',
-  COREML = 'core_ml'
+  COREML = 'core_ml',
+  XXNPACK = 'xnnpack'
 }
 
 const useOnnxRuntime = (opts: {

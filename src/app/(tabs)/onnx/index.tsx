@@ -67,7 +67,7 @@ const Onnx = () => {
       const common = {
         inputIndex: o.index,
         precision: modelInputPrecision,
-        library: 'onnxruntime',
+        library: 'onnxruntime-react-native',
         resultsId: o.runId
       };
       if (modelType === 'mobilenet_edgetpu' || modelType === 'mobilenetv2') {

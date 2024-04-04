@@ -25,12 +25,12 @@ import { ModelInputPrecision } from '@/lib/types';
 
 export default function App(): React.ReactNode {
   const [modelInputPrecision, setModelInputPrecision] =
-    React.useState<ModelInputPrecision>('uint8');
+    React.useState<ModelInputPrecision>('float32');
   const [delegate, setDelegate] = React.useState<FastTFLiteModelDelegate>(
     FastTFLiteModelDelegate.DEFAULT
   );
 
-  const [model, setModel] = React.useState<Model>('ssd_mobilenet');
+  const [model, setModel] = React.useState<Model>('mobilenet_edgetpu');
 
   const fastTfLite = useReactNativeFastTfLite({
     model: model,
@@ -56,7 +56,7 @@ export default function App(): React.ReactNode {
       const commonInputs = {
         inputIndex: o.index,
         precision: modelInputPrecision,
-        library: 'fast-tf-lite',
+        library: 'react-native-fast-tflite',
         resultsId: o.runId,
         inferenceTimeMs: o.timeMs,
         model: model,
@@ -122,11 +122,9 @@ export default function App(): React.ReactNode {
   return (
     <View style={styles.container}>
       <ScrollView>
-        <Link href={{ pathname: '/fast-tf-lite/show-results' }}>
-          <View>
-            <Text>See results</Text>
-          </View>
-        </Link>
+        <View>
+          <Text>{modelData.data?.[0].array.length}</Text>
+        </View>
 
         <Text>Delegate</Text>
         <RadioGroup<FastTFLiteModelDelegate>

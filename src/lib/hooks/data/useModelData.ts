@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import dataService, {
   DataPrecision,
-  FetchImageNetResult
+  FetchImageNetResult,
+  FetchImagesQuery
 } from '@/lib/services/dataService';
 import { ModelInputPrecision } from '@/lib/types';
 
@@ -29,11 +30,22 @@ export const useModelDataDimensions = (
 const getFetchFn = (model: Model) => {
   switch (model) {
     case 'mobilenetv2':
-      return dataService.fetchImageNetData;
+      return async (query: FetchImagesQuery) =>
+        await dataService.fetchImageNetData(query, {
+          formatFloat32fn: (d) => {
+            return d / 127.5 - 1;
+          }
+        });
     case 'mobilenet_edgetpu':
-      return dataService.fetchImageNetData;
+      return async (query: FetchImagesQuery) =>
+        await dataService.fetchImageNetData(query, {
+          formatFloat32fn: (d) => d / 127.5 - 1
+        });
     case 'ssd_mobilenet':
-      return dataService.fetchCocoData;
+      return async (query: FetchImagesQuery) =>
+        await dataService.fetchCocoData(query, {
+          formatFloat32fn: (d) => d / 127.5 - 1
+        });
     case 'deeplabv3':
       return dataService.fetckAde20kData;
     default:

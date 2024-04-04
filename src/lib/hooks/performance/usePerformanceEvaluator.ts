@@ -2,6 +2,7 @@ import { op } from '@tensorflow/tfjs';
 import { useEffect, useState } from 'react';
 
 import { perfUtil } from '@/lib/util/performance';
+import { sleep } from '@/lib/util/promises';
 
 // The performance evaluator hook is used to evaluate the performance of a model
 function useMLPerformanceEvaluator<T, T2>(opts: {
@@ -33,7 +34,28 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
   const [runErrors, setRunErrors] = useState<string[]>([]);
 
   // needs to be different function
-  const runPredictions = async () => {
+
+  const runPredictions = async (times?: number) => {
+    if (running) {
+      return;
+    }
+
+    const xTimes = times || 1;
+    const sleepSeconds = 10;
+    for (let i = 0; i < xTimes; i++) {
+      setRunning(true);
+      if (i > 0) {
+        console.log(
+          `Sleeping for ${sleepSeconds} seconds before running predictions`
+        );
+        await sleep(sleepSeconds * 1000);
+      }
+      console.log(`Running predictions for the ${i + 1}/${xTimes} time`);
+      await runPredictionsOnce();
+    }
+  };
+
+  const runPredictionsOnce = async () => {
     if (running) {
       return;
     }
