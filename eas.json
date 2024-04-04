@@ -39,12 +39,11 @@
         "scheme": "rn-performance"
       },
       "extends": "base",
-      "distribution": "internal",
       "channel": "test"
     }
   },
   "submit": {
-    "release": {}
+    "test": {}
   },
   "cli": {
     "version": ">= 3.9.2",
