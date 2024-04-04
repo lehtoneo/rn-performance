@@ -73,7 +73,7 @@ function useModelData(opts: {
     ],
     queryFn: async () => {
       let i = 0;
-      const chunkAmount = maxAmount < 20 ? maxAmount : 20;
+      const chunkAmount = maxAmount < 20 ? maxAmount : 50;
 
       let arr: FetchImageNetResult = [];
       while (i * chunkAmount < maxAmount) {
