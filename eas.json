@@ -30,6 +30,11 @@
       "env": {
         "APP_VARIANT": "development"
       }
+    },
+    "test": {
+      "extends": "base",
+      "distribution": "internal",
+      "channel": "test"
     }
   },
   "submit": {
