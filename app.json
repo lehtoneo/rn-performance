@@ -5,7 +5,7 @@
       "typedRoutes": true
     },
     "main": "expo-router/entry",
-    "scheme": "rn-performance",
+    "scheme": ["dev-rn-performance", "rn-performance"],
     "slug": "rn-performance",
     "version": "1.0.0",
     "orientation": "portrait",

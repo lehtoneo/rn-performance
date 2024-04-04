@@ -25,6 +25,9 @@
     "development": {
       "extends": "base",
       "developmentClient": true,
+      "ios": {
+        "scheme": "dev-rn-performance"
+      },
       "distribution": "internal",
       "channel": "development",
       "env": {
@@ -32,6 +35,9 @@
       }
     },
     "test": {
+      "ios": {
+        "scheme": "rn-performance"
+      },
       "extends": "base",
       "distribution": "internal",
       "channel": "test"
