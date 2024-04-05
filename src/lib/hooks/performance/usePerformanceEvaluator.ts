@@ -41,7 +41,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     }
 
     const xTimes = times || 1;
-    const sleepSeconds = 10;
+    const sleepSeconds = 3;
     for (let i = 0; i < xTimes; i++) {
       setRunning(true);
       if (i > 0) {

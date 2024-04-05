@@ -9,5 +9,6 @@ config.resolver.assetExts.push(
 
 config.resolver.assetExts.push('tflite');
 config.resolver.assetExts.push('onnx');
+config.resolver.assetExts.push('ort');
 
 module.exports = config;
