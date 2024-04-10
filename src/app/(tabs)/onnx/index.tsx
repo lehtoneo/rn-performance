@@ -130,6 +130,7 @@ const Onnx = () => {
 
   return (
     <View style={styles.container}>
+      <Text>U</Text>
       <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
         {onnxRuntime.modelLoadError && (
