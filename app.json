@@ -32,6 +32,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "buildNumber": "1.0.1",
       "supportsTablet": true,
       "bundleIdentifier": "fi.lehtoneo.rnperformance"
     },
