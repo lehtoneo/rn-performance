@@ -70,6 +70,7 @@ const Onnx = () => {
         library: 'onnxruntime-react-native',
         resultsId: o.runId
       };
+
       if (modelType === 'mobilenet_edgetpu' || modelType === 'mobilenetv2') {
         const t2 = onnxRuntime.model?.outputNames[0] || '';
         const t = o.result[t2] as any;
@@ -130,7 +131,7 @@ const Onnx = () => {
 
   return (
     <View style={styles.container}>
-      <Text>U</Text>
+      <Text>U2</Text>
       <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
         {onnxRuntime.modelLoadError && (

@@ -3,6 +3,7 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import { useEffect, useRef, useState } from 'react';
 
+import { modelService } from '@/lib/services/modelService';
 import { ModelInputPrecision } from '@/lib/types';
 
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
@@ -48,15 +49,14 @@ const useOnnxRuntime = (opts: {
       setModelPath(null);
       modelRef.current = undefined;
       console.log('??');
-      const model = models[opts.model][opts.inputPrecision];
-      const assets = await Asset.loadAsync(model);
-      const uri = assets[0].localUri;
-      if (!uri) {
-        throw new Error(`Failed to get modelURI`);
-      }
-      setModelPath(uri);
+      const model = await modelService.loadModelAsync(
+        opts.model,
+        opts.inputPrecision,
+        'onnx'
+      );
+
       try {
-        const session = await InferenceSession.create(uri, {
+        const session = await InferenceSession.create(model, {
           executionProviders: [
             opts.executionProvider === OnnxRuntimeExecutionProvider.COREML
               ? 'coreml'
