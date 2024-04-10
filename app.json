@@ -24,7 +24,7 @@
           "enableCoreMLDelegate": true
         }
       ],
-      "onnxruntime-react-native"
+      ["onnxruntime-react-native"]
     ],
     "splash": {
       "image": "./assets/splash.png",
@@ -33,7 +33,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "1.0.2",
+      "buildNumber": "1.0.3",
       "supportsTablet": true,
       "bundleIdentifier": "fi.lehtoneo.rnperformance"
     },
