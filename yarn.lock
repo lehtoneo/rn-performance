@@ -6118,18 +6118,6 @@ react-native-screens@~3.29.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
-react-native-vision-camera@^3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/react-native-vision-camera/-/react-native-vision-camera-3.9.0.tgz#6a96a6cbad53c2db84d671c388b250327681a553"
-  integrity sha512-q0HejFTS56s5DXWHZhlWLLZMKn/8OXALrqET+FySPIKskwYEdJ5rOV2aDlD6hlo67qCNFGUIMZWGFFc9L2os1g==
-
-react-native-worklets-core@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/react-native-worklets-core/-/react-native-worklets-core-0.3.0.tgz#4d6c4c4999d3bf2f8c67fa46fdd70d8b5bc7ba0e"
-  integrity sha512-bOoo6xbl+f+mz0Q65bLkUP3FxgYt7f/Bzi0c5Yj8Ix4vQCKMtgHwafrqCNRhW32N7TpTv3+zOoyQMJwQVr/frQ==
-  dependencies:
-    string-hash-64 "^1.0.3"
-
 react-native@0.73.4:
   version "0.73.4"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.73.4.tgz#81e07d4e7b6308c4649d5fa24038c0e87b17f2e1"
@@ -6714,11 +6702,6 @@ strict-uri-encode@^2.0.0:
   resolved "https://registry.yarnpkg.com/strict-uri-encode/-/strict-uri-encode-2.0.0.tgz#b9c7330c7042862f6b142dc274bbcc5866ce3546"
   integrity sha512-QwiXZgpRcKkhTj2Scnn++4PKtWsH0kpzZ62L2R6c/LUVYv7hVnZqcg2+sMuT6R7Jusu1vviK/MFsu6kNJfWlEQ==
 
-string-hash-64@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/string-hash-64/-/string-hash-64-1.0.3.tgz#0deb56df58678640db5c479ccbbb597aaa0de322"
-  integrity sha512-D5OKWKvDhyVWWn2x5Y9b+37NUllks34q1dCDhk/vYcso9fmhs+Tl3KR/gE4v5UNj2UA35cnX4KdVVGkG1deKqw==
-
 string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
@@ -7189,11 +7172,6 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
-
-vision-camera-resize-plugin@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/vision-camera-resize-plugin/-/vision-camera-resize-plugin-2.0.1.tgz#3f96b66993f015ec8fecc94be5444c6bacd7198e"
-  integrity sha512-l1HB0BVuhPhc4jfTysP0bmUqVwYqrXR5as3T2OcOU0fUFhKo8Li/gfGyuCxJ3oEacOgQzDJJvFb1IRWES1XELA==
 
 vlq@^1.0.0:
   version "1.0.1"
