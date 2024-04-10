@@ -32,7 +32,7 @@ function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
    * @param results - The results of the performance test
    * @returns {Promise<void>}
    */
-  onReady: (results: Result<FnResultType>[]) => Promise<void>;
+  onReady?: (results: Result<FnResultType>[]) => Promise<void>;
   options?: {
     logResults?: boolean;
   };
@@ -104,26 +104,6 @@ function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
           index: i,
           runId: runID
         });
-        try {
-          if (opts.validateResult) {
-            if (
-              await opts.validateResult({
-                result: r.fnResult,
-                index: i,
-                timeMs: r.time,
-                runId: runID
-              })
-            ) {
-              correct++;
-            }
-          }
-        } catch (e: any) {
-          console.log('VALIDATION ERROR');
-          setRunErrors((prev) => [
-            ...prev,
-            `ERROR VALIDATING RESULT with DATA INDEX ${i} ${e.message}`
-          ]);
-        }
       } catch (e: any) {
         console.log('INFERENCE ERROR');
         let ss: any =
@@ -145,6 +125,29 @@ function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
     }
     if (opts.onReady) {
       await opts.onReady(results);
+    }
+
+    for (const r of results) {
+      try {
+        if (opts.validateResult) {
+          if (
+            await opts.validateResult({
+              result: r.fnResult!,
+              index: i,
+              timeMs: r.timeMs,
+              runId: runID
+            })
+          ) {
+            correct++;
+          }
+        }
+      } catch (e: any) {
+        console.log('VALIDATION ERROR');
+        setRunErrors((prev) => [
+          ...prev,
+          `ERROR VALIDATING RESULT with DATA INDEX ${i} ${e.message}`
+        ]);
+      }
     }
     setRunning(false);
     setResults(
