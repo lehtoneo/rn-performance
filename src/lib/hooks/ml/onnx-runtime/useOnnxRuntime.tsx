@@ -8,7 +8,7 @@ import { ModelInputPrecision } from '@/lib/types';
 const models: Record<Model, Record<ModelInputPrecision, any>> = {
   mobilenetv2: {
     uint8: require('../../../../../assets/models/mlperf/onnx/mobilenetv2_uint8.onnx'),
-    float32: require('../../../../../assets/mobilenetv2_float32.onnx')
+    float32: require('../../../../../assets/models/mlperf/onnx/mobilenetv2_float32.onnx')
   },
   mobilenet_edgetpu: {
     uint8: require('../../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_uint8.onnx'),
