@@ -12,9 +12,9 @@ async function createAsyncPerformanceTest<T>(
   opts: PerformanceTestOpts<Promise<T>>
 ): Promise<PerformanceTestResult<T>> {
   const { name, fn } = opts;
-  const start = Date.now();
+  const start = performance.now();
   const r = await fn();
-  const end = Date.now();
+  const end = performance.now();
   // console.log(`${name} took ${end - start}ms`);
 
   return {
@@ -25,9 +25,9 @@ async function createAsyncPerformanceTest<T>(
 
 function createSyncPerformanceTest<T>(opts: PerformanceTestOpts<T>) {
   const { name, fn } = opts;
-  const start = Date.now();
+  const start = performance.now();
   const r = fn();
-  const end = Date.now();
+  const end = performance.now();
   // console.log(`${name} took ${end - start}ms`);
 
   return {

@@ -20,7 +20,7 @@ import { ModelInputPrecision } from '@/lib/types';
 import validationUtil from '@/lib/util/validationUtil';
 
 const Onnx = () => {
-  const [modelType, setModelType] = useState<Model>('mobilenet_edgetpu');
+  const [modelType, setModelType] = useState<Model | null>(null);
 
   const [executionProvider, setExecutionProvider] =
     useState<OnnxRuntimeExecutionProvider>(OnnxRuntimeExecutionProvider.COREML);
@@ -28,18 +28,18 @@ const Onnx = () => {
   const [modelInputPrecision, setModelInputPrecision] =
     useState<ModelInputPrecision>('float32');
 
-  const inputDimensions = useModelDataDimensions(modelType);
+  const inputDimensions = useModelDataDimensions(modelType || 'mobilenetv2');
 
   const onnxRuntime = useOnnxRuntime({
     inputPrecision: modelInputPrecision,
-    model: modelType,
+    model: modelType || 'mobilenetv2',
     executionProvider: executionProvider
   });
 
   const d = useModelData({
     dataPrecision: modelInputPrecision,
     model: modelType,
-    maxAmount: 300
+    maxAmount: modelType === 'deeplabv3' ? 100 : 300
   });
 
   const usedData = onnxRuntime.model
@@ -108,6 +108,17 @@ const Onnx = () => {
         });
         return r?.correct === true;
       }
+
+      if (modelType === 'deeplabv3') {
+        const r = await resultService.sendDeeplabv3Results({
+          ...common,
+          output: [],
+          inferenceTimeMs: o.timeMs,
+          model: modelType,
+          delegate: executionProvider
+        });
+        return r?.correct === true;
+      }
       return false;
     },
     options: {
@@ -119,6 +130,7 @@ const Onnx = () => {
 
   return (
     <View style={styles.container}>
+      <Text>Mo</Text>
       <ScrollView>
         {onnxRuntime.modelLoadError && (
           <Text

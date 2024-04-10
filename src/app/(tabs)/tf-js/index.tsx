@@ -98,7 +98,7 @@ const TfJs = () => {
       <PerformanceEvaluatingScreen
         modelTypeProps={{
           value: modelType,
-          onChange: (value) => setModelType(value)
+          onChange: (value) => value && setModelType(value)
         }}
         performanceEvaluator={usedEvaluator}
         modelLoadError={null}

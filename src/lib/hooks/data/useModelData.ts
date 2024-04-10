@@ -27,7 +27,7 @@ export const useModelDataDimensions = (
   }
 };
 
-const getFetchFn = (model: Model) => {
+const getFetchFn = (model: Model | null) => {
   switch (model) {
     case 'mobilenetv2':
       return async (query: FetchImagesQuery) =>
@@ -48,6 +48,8 @@ const getFetchFn = (model: Model) => {
         });
     case 'deeplabv3':
       return dataService.fetckAde20kData;
+    case null:
+      return async () => [];
     default:
       throw new Error('Invalid model');
   }
@@ -55,7 +57,7 @@ const getFetchFn = (model: Model) => {
 
 function useModelData(opts: {
   dataPrecision: DataPrecision;
-  model: Model;
+  model: Model | null;
   maxAmount?: number;
 }) {
   const fetchFn = getFetchFn(opts.model);

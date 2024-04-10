@@ -30,10 +30,10 @@ export default function App(): React.ReactNode {
     FastTFLiteModelDelegate.DEFAULT
   );
 
-  const [model, setModel] = React.useState<Model>('mobilenet_edgetpu');
+  const [model, setModel] = React.useState<Model | null>(null);
 
   const fastTfLite = useReactNativeFastTfLite({
-    model: model,
+    model: model || 'mobilenetv2',
     type: modelInputPrecision,
     delegate: delegate
   });
@@ -59,7 +59,7 @@ export default function App(): React.ReactNode {
         library: 'react-native-fast-tflite',
         resultsId: o.runId,
         inferenceTimeMs: o.timeMs,
-        model: model,
+        model: model || 'mobilenetv2',
         delegate: delegate
       };
       if (model === 'mobilenetv2' || model === 'mobilenet_edgetpu') {
@@ -116,16 +116,12 @@ export default function App(): React.ReactNode {
 
       return false;
     },
-    data: modelData.data?.map((d) => [d.array]) || null
+    data: modelData.data ? modelData.data.map((d) => [d.array]) : null
   });
 
   return (
     <View style={styles.container}>
       <ScrollView>
-        <View>
-          <Text>{modelData.data?.[0].array.length}</Text>
-        </View>
-
         <Text>Delegate</Text>
         <RadioGroup<FastTFLiteModelDelegate>
           options={Object.values(FastTFLiteModelDelegate).map((v) => {
@@ -141,7 +137,7 @@ export default function App(): React.ReactNode {
         <PerformanceEvaluatingScreen
           modelTypeProps={{
             value: model,
-            onChange: setModel
+            onChange: (value) => value && setModel(value as Model)
           }}
           modelLoadError={fastTfLite.error ? 'Error loading model' : null}
           performanceEvaluator={perfEvaluator}

@@ -11,8 +11,8 @@ interface PerformanceEvaluatingScreenProps {
     onChange: (value: ModelInputPrecision) => void;
   };
   modelTypeProps: {
-    value: Model;
-    onChange: (value: Model) => void;
+    value: Model | null;
+    onChange: (value: Model | null) => void;
   };
   performanceEvaluator: PerformanceEvaluator;
   modelLoadError: string | null;
@@ -23,7 +23,7 @@ const PerformanceEvaluatingScreen = (
   return (
     <View style={{ gap: 8 }}>
       <Text>Model</Text>
-      <RadioGroup<Model>
+      <RadioGroup<Model | null>
         options={[
           {
             label: 'mobilenetv2',
