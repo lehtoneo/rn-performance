@@ -45,16 +45,18 @@ const useOnnxRuntime = (opts: {
     const setupModel = async () => {
       setModel(undefined);
       setModelLoadError(null);
+      setModelPath(null);
       modelRef.current = undefined;
       console.log('??');
       const model = models[opts.model][opts.inputPrecision];
-      const asset = Asset.fromModule(model);
-      if (!asset.localUri) {
-        await asset.downloadAsync();
+      const assets = await Asset.loadAsync(model);
+      const uri = assets[0].localUri;
+      if (!uri) {
+        throw new Error(`Failed to get modelURI`);
       }
-      setModelPath(asset.localUri);
+      setModelPath(uri);
       try {
-        const session = await InferenceSession.create(asset.localUri!, {
+        const session = await InferenceSession.create(uri, {
           executionProviders: [
             opts.executionProvider === OnnxRuntimeExecutionProvider.COREML
               ? 'coreml'
