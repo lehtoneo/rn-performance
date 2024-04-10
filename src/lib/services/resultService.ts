@@ -41,6 +41,52 @@ const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
   }
 };
 
+const sendMultipleResultsToApi = async <T>(
+  uri: string,
+  opts: SendResultsCommonOpts<T>[]
+) => {
+  try {
+    const d = opts.map((o) => {
+      return {
+        ...o,
+        platform: Platform.OS,
+        deviceModelName: Device.modelName,
+        frameWork: 'react-native'
+      };
+    });
+    const r = await axios.post<{ correct: boolean }>(`${uri}/multiple`, d);
+    return r.data;
+  } catch (e) {
+    console.log(e);
+    console.log('error');
+  }
+};
+
+function createResultSenderService<T>(uri: string) {
+  const sendOneResult = async (opts: SendResultsCommonOpts<T>) => {
+    try {
+      return await sendResults(uri, opts);
+    } catch (e) {
+      console.log(e);
+      console.log('error');
+    }
+  };
+
+  const sendMultipleResults = async (opts: SendResultsCommonOpts<T>[]) => {
+    try {
+      return await sendMultipleResultsToApi(uri, opts);
+    } catch (e) {
+      console.log(e);
+      console.log('error');
+    }
+  };
+
+  return {
+    sendOneResult,
+    sendMultipleResults
+  };
+}
+
 const createResultService = (uri: string) => {
   const baseUrl = `${uri}/results`;
 
@@ -54,6 +100,16 @@ const createResultService = (uri: string) => {
       console.log('error');
     }
   };
+
+  const mobileNet = createResultSenderService<number[]>(`${baseUrl}/mobilenet`);
+
+  const ssdMobilenet = createResultSenderService<
+    [number[], number[], number[], number[]]
+  >('${baseUrl}/ssd-mobilenet');
+
+  const deeplabv3 = createResultSenderService<number[] | number[][]>(
+    '${baseUrl}/deeplabv3'
+  );
 
   const sendSSDMobilenetResults = async (
     opts: SendResultsCommonOpts<[number[], number[], number[], number[]]>
@@ -78,6 +134,9 @@ const createResultService = (uri: string) => {
   };
 
   return {
+    mobileNet,
+    ssdMobilenet,
+    deeplabv3,
     sendImageNetResults: sendMobileNetResults,
     sendSSDMobilenetResults,
     sendDeeplabv3Results

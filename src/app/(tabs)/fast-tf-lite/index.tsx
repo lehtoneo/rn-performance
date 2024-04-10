@@ -52,69 +52,86 @@ export default function App(): React.ReactNode {
           }
         }
       : null,
-    validateResult: async (o) => {
+    onReady: async (results) => {
       const commonInputs = {
-        inputIndex: o.index,
         precision: modelInputPrecision,
         library: 'react-native-fast-tflite',
-        resultsId: o.runId,
-        inferenceTimeMs: o.timeMs,
         model: model || 'mobilenetv2',
         delegate: delegate
       };
-      if (model === 'mobilenetv2' || model === 'mobilenet_edgetpu') {
-        const typedResult = o.result[0];
-        const t = o.result[0] as unknown as number[];
-        // need to do the conversion because the result is a TypedArray
-        let numberArray: number[] = [];
-        for (let i = 0; i < t.length; i++) {
-          const curr = typedResult[i];
-          numberArray.push(new Number(curr).valueOf());
+
+      switch (model) {
+        case 'mobilenetv2' || 'mobilenet_edgetpu': {
+          const f = results.map((r) => {
+            const typedResult = r.fnResult![0];
+            // need to do the conversion because the result is a TypedArray
+            let numberArray: number[] = [];
+            for (let i = 0; i < typedResult.length; i++) {
+              const curr = typedResult[i];
+              numberArray.push(new Number(curr).valueOf());
+            }
+            return {
+              ...commonInputs,
+              inputIndex: r.index,
+              resultsId: r.runId,
+              inferenceTimeMs: r.timeMs,
+              output: numberArray
+            };
+          });
+
+          await resultService.mobileNet.sendMultipleResults(f);
+          break;
         }
-        const t2 = await resultService.sendImageNetResults({
-          ...commonInputs,
-          output: numberArray
-        });
+        case 'ssd_mobilenet': {
+          const f = results.map((r) => {
+            const typedResult = r.fnResult!;
 
-        return t2?.correct === true;
-      } else if (model === 'ssd_mobilenet') {
-        const typedResult = o.result;
+            let result: [number[], number[], number[], number[]] = [
+              [],
+              [],
+              [],
+              []
+            ];
+            typedResult.forEach((r, index) => {
+              for (let i = 0; i < r.length; i++) {
+                const curr = r[i];
+                result[index].push(new Number(curr).valueOf());
+              }
+            });
 
-        let result: [number[], number[], number[], number[]] = [[], [], [], []];
-        typedResult.forEach((r, index) => {
-          for (let i = 0; i < r.length; i++) {
-            const curr = r[i];
-            result[index].push(new Number(curr).valueOf());
-          }
-        });
-
-        const r = await resultService.sendSSDMobilenetResults({
-          ...commonInputs,
-          output: result
-        });
-        return r?.correct === true;
-      } else if (model === 'deeplabv3') {
-        const typedResult = o.result[0];
-        console.log(typedResult.length);
-        let results: number[] = [];
-        for (let i = 0; i < typedResult.length; i++) {
-          const curr = typedResult[i];
-          results.push(new Number(curr).valueOf());
+            return {
+              ...commonInputs,
+              inputIndex: r.index,
+              resultsId: r.runId,
+              inferenceTimeMs: r.timeMs,
+              output: result
+            };
+          });
+          await resultService.ssdMobilenet.sendMultipleResults(f);
+          break;
         }
+        case 'deeplabv3': {
+          const f = results.map((r) => {
+            const typedResult = r.fnResult![0];
+            let results: number[] = [];
+            for (let i = 0; i < typedResult.length; i++) {
+              const curr = typedResult[i];
+              results.push(new Number(curr).valueOf());
+            }
 
-        // reshape to 512x512
-        let r: number[][] = [];
-        for (let i = 0; i < 512; i++) {
-          r.push(results.slice(i * 512, (i + 1) * 512));
+            return {
+              ...commonInputs,
+              inputIndex: r.index,
+              resultsId: r.runId,
+              inferenceTimeMs: r.timeMs,
+              output: results
+            };
+          });
+
+          await resultService.deeplabv3.sendMultipleResults(f);
+          break;
         }
-
-        await resultService.sendDeeplabv3Results({
-          ...commonInputs,
-          output: results
-        });
       }
-
-      return false;
     },
     data: modelData.data ? modelData.data.map((d) => [d.array]) : null
   });

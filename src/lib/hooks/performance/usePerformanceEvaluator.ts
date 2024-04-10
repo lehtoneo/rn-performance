@@ -1,24 +1,38 @@
-import { op } from '@tensorflow/tfjs';
+import { op, time } from '@tensorflow/tfjs';
 import { useEffect, useState } from 'react';
 
 import { perfUtil } from '@/lib/util/performance';
 import { sleep } from '@/lib/util/promises';
 
+type Result<T> = {
+  fnResult: T | null;
+  timeMs: number;
+  index: number;
+  runId: string;
+};
+
 // The performance evaluator hook is used to evaluate the performance of a model
-function useMLPerformanceEvaluator<T, T2>(opts: {
+function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
   mlModel: {
-    run: (data: T) => Promise<T2>;
+    run: (data: DataType) => Promise<FnResultType>;
   } | null;
-  data: T[] | null;
+  data: DataType[] | null;
   /**
    * - Callback to validate the result of the model
    */
   validateResult?: (o: {
-    result: T2;
+    result: FnResultType;
     index: number;
     timeMs: number;
     runId: string;
   }) => Promise<boolean>;
+
+  /**
+   * - Callback to run after a performance test is done
+   * @param results - The results of the performance test
+   * @returns {Promise<void>}
+   */
+  onReady: (results: Result<FnResultType>[]) => Promise<void>;
   options?: {
     logResults?: boolean;
   };
@@ -73,7 +87,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     let i = 0;
     let correct = 0;
     let total = 0;
-    let results = [];
+    let results: Result<FnResultType>[] = [];
     while (i < opts.data.length) {
       const data = opts.data[i];
 
@@ -84,7 +98,12 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
             return await opts.mlModel!.run(data);
           }
         });
-        results.push({ ...r, index: i });
+        results.push({
+          fnResult: r.fnResult,
+          timeMs: r.time,
+          index: i,
+          runId: runID
+        });
         try {
           if (opts.validateResult) {
             if (
@@ -108,8 +127,13 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
       } catch (e: any) {
         console.log('INFERENCE ERROR');
         let ss: any =
-          total > 0 ? results.reduce((a, b) => a + b.time, 0) / total : 0;
-        results.push({ time: ss, index: i });
+          total > 0 ? results.reduce((a, b) => a + b.timeMs, 0) / total : 0;
+        results.push({
+          fnResult: null,
+          timeMs: ss,
+          index: i,
+          runId: runID
+        });
         setRunErrors((prev) => [
           ...prev,
           `ERROR RUNNING MODEL with DATA INDEX ${i} ${e.message}`
@@ -119,8 +143,19 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
       total++;
       i++;
     }
+    if (opts.onReady) {
+      await opts.onReady(results);
+    }
     setRunning(false);
-    setResults(results);
+    setResults(
+      results.map((r) => {
+        console.log({ time: r.timeMs });
+        return {
+          time: r.timeMs,
+          index: r.index
+        };
+      })
+    );
     setAccuracy(correct / total);
   };
 
@@ -136,7 +171,7 @@ function useMLPerformanceEvaluator<T, T2>(opts: {
     /**
      * The results of the performance test
      * - The index of the array corresponds to the index of the data
-     * @type {Array<{ fnResult: T2; time: number }>}
+     * @type {Array<{ fnResult: FnResultType; time: number }>}
      */
     running,
     accuracy,
