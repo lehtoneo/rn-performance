@@ -58,13 +58,7 @@ const useOnnxRuntime = (opts: {
       }
       setModelPath(uri);
       try {
-        const session = await InferenceSession.create(uri, {
-          executionProviders: [
-            opts.executionProvider === OnnxRuntimeExecutionProvider.COREML
-              ? 'coreml'
-              : opts.executionProvider
-          ]
-        });
+        const session = await InferenceSession.create(uri);
         modelRef.current = session;
         setModel(session);
       } catch (e: any) {
