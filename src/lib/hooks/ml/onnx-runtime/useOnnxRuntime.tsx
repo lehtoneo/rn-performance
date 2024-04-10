@@ -49,16 +49,20 @@ const useOnnxRuntime = (opts: {
       modelRef.current = undefined;
       console.log('??');
       const model = models[opts.model][opts.inputPrecision];
-      const assets = await Asset.loadAsync(
-        require('../../../../../assets/models/mlperf/onnx/mobilenetv2_float32.onnx')
-      );
+      const assets = await Asset.loadAsync(model);
       const uri = assets[0].localUri;
       if (!uri) {
         throw new Error(`Failed to get modelURI`);
       }
       setModelPath(uri);
       try {
-        const session = await InferenceSession.create(uri);
+        const session = await InferenceSession.create(uri, {
+          executionProviders: [
+            opts.executionProvider === OnnxRuntimeExecutionProvider.COREML
+              ? 'coreml'
+              : opts.executionProvider
+          ]
+        });
         modelRef.current = session;
         setModel(session);
       } catch (e: any) {
