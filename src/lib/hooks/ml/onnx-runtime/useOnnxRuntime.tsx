@@ -39,6 +39,7 @@ const useOnnxRuntime = (opts: {
   const modelRef = useRef<InferenceSession | undefined>(undefined);
   const [model, setModel] = useState<InferenceSession | undefined>(undefined);
   const [modelLoadError, setModelLoadError] = useState<string | null>(null);
+  const [modelPath, setModelPath] = useState<string | null>(null);
 
   useEffect(() => {
     const setupModel = async () => {
@@ -51,6 +52,7 @@ const useOnnxRuntime = (opts: {
       if (!asset.localUri) {
         await asset.downloadAsync();
       }
+      setModelPath(asset.localUri);
       try {
         const session = await InferenceSession.create(asset.localUri!, {
           executionProviders: [
@@ -72,7 +74,8 @@ const useOnnxRuntime = (opts: {
 
   return {
     model: modelRef.current,
-    modelLoadError
+    modelLoadError,
+    modelPath
   };
 };
 
