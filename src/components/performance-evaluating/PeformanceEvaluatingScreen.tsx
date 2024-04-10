@@ -1,4 +1,5 @@
 import RadioGroup from '../tests/radio-group';
+import { useState } from 'react';
 import { Button, Text, View } from 'react-native';
 
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
@@ -20,9 +21,11 @@ interface PerformanceEvaluatingScreenProps {
 const PerformanceEvaluatingScreen = (
   props: PerformanceEvaluatingScreenProps
 ) => {
+  const [runTimes, setRuntimes] = useState<number>(5);
   return (
     <View style={{ gap: 8 }}>
       <Text>Model</Text>
+
       <RadioGroup<Model | null>
         options={[
           {
@@ -87,7 +90,7 @@ const PerformanceEvaluatingScreen = (
       <Button
         title="Run inference"
         onPress={async () => {
-          await props.performanceEvaluator.runPredictions(1);
+          await props.performanceEvaluator.runPredictions(runTimes);
         }}
         disabled={
           props.performanceEvaluator.running ||
