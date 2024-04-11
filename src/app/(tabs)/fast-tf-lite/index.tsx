@@ -40,7 +40,7 @@ export default function App(): React.ReactNode {
   const modelData = useModelData({
     dataPrecision: modelInputPrecision,
     model: model,
-    maxAmount: 300
+    maxAmount: model === 'deeplabv3' ? 100 : 300
   });
 
   const perfEvaluator = useMLPerformanceEvaluator({
@@ -93,23 +93,9 @@ export default function App(): React.ReactNode {
         });
         return r?.correct === true;
       } else if (model === 'deeplabv3') {
-        const typedResult = o.result[0];
-        console.log(typedResult.length);
-        let results: number[] = [];
-        for (let i = 0; i < typedResult.length; i++) {
-          const curr = typedResult[i];
-          results.push(new Number(curr).valueOf());
-        }
-
-        // reshape to 512x512
-        let r: number[][] = [];
-        for (let i = 0; i < 512; i++) {
-          r.push(results.slice(i * 512, (i + 1) * 512));
-        }
-
         await resultService.sendDeeplabv3Results({
           ...commonInputs,
-          output: results
+          output: []
         });
       }
 
