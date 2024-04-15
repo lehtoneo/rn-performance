@@ -126,14 +126,13 @@ function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
     if (opts.onReady) {
       await opts.onReady(results);
     }
-
     for (const r of results) {
       try {
         if (opts.validateResult) {
           if (
             await opts.validateResult({
               result: r.fnResult!,
-              index: i,
+              index: r.index,
               timeMs: r.timeMs,
               runId: runID
             })
