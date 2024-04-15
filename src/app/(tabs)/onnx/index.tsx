@@ -2,7 +2,7 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
 import RadioGroup from '@/components/tests/radio-group';
@@ -130,7 +130,7 @@ const Onnx = () => {
   const t = Object.values(OnnxRuntimeExecutionProvider);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text>Fixed input index</Text>
       <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
@@ -168,12 +168,14 @@ const Onnx = () => {
           modelLoadError={null}
         />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {}
+  container: {
+    flex: 1
+  }
 });
 
 export default Onnx;

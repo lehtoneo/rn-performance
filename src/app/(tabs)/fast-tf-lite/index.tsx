@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   ActivityIndicator,
   Button,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Switch,
@@ -105,7 +106,7 @@ export default function App(): React.ReactNode {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView>
         <Text>Uses lodash</Text>
         <Text>Delegate</Text>
@@ -133,13 +134,14 @@ export default function App(): React.ReactNode {
           }}
         />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8
+    padding: 8,
+    paddingVertical: 0
   }
 });
