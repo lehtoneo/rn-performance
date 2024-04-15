@@ -38,6 +38,9 @@
       "ios": {
         "scheme": "rn-performance"
       },
+      "android": {
+        "buildType": "apk"
+      },
       "extends": "base",
       "channel": "test"
     }
