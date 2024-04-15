@@ -107,6 +107,7 @@ export default function App(): React.ReactNode {
   return (
     <View style={styles.container}>
       <ScrollView>
+        <Text>Uses lodash</Text>
         <Text>Delegate</Text>
         <RadioGroup<FastTFLiteModelDelegate>
           options={Object.values(FastTFLiteModelDelegate).map((v) => {

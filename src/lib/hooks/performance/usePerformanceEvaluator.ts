@@ -1,5 +1,5 @@
-import { op, time } from '@tensorflow/tfjs';
-import { useEffect, useState } from 'react';
+import * as _ from 'lodash';
+import { useState } from 'react';
 
 import { perfUtil } from '@/lib/util/performance';
 import { sleep } from '@/lib/util/promises';
@@ -99,7 +99,7 @@ function useMLPerformanceEvaluator<DataType, FnResultType>(opts: {
           }
         });
         results.push({
-          fnResult: r.fnResult,
+          fnResult: _.cloneDeep(r.fnResult),
           timeMs: r.time,
           index: i,
           runId: runID
