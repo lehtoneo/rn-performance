@@ -127,6 +127,7 @@ export default function App(): React.ReactNode {
             onChange: (value) => value && setModel(value as Model)
           }}
           modelLoadError={fastTfLite.error ? 'Error loading model' : null}
+          dataLoadError={modelData.error ? modelData.error.message : null}
           performanceEvaluator={perfEvaluator}
           modelInputPrecisionProps={{
             value: modelInputPrecision,

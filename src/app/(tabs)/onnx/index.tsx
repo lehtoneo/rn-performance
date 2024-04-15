@@ -164,6 +164,7 @@ const Onnx = () => {
             value: modelInputPrecision,
             onChange: setModelInputPrecision
           }}
+          dataLoadError={d.error ? d.error.message : null}
           performanceEvaluator={ttt}
           modelLoadError={null}
         />

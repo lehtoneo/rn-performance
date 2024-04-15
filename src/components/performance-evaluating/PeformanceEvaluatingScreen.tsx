@@ -17,6 +17,7 @@ interface PerformanceEvaluatingScreenProps {
   };
   performanceEvaluator: PerformanceEvaluator;
   modelLoadError: string | null;
+  dataLoadError: string | null;
 }
 const PerformanceEvaluatingScreen = (
   props: PerformanceEvaluatingScreenProps
@@ -72,6 +73,9 @@ const PerformanceEvaluatingScreen = (
       )}
 
       {props.performanceEvaluator.loadingData && <Text>Loading data...</Text>}
+      {props.dataLoadError && (
+        <Text style={{ color: 'red' }}>{props.dataLoadError}</Text>
+      )}
 
       <View>
         {props.performanceEvaluator.runErrors.length > 0 && (
