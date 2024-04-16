@@ -42,7 +42,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "fi.lehtoneo.rnperformance"
+      "package": "fi.lehtoneo.rnperformance",
+      "permissions": ["android.permission.INTERNET"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
