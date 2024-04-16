@@ -105,10 +105,10 @@ const createResultService = (uri: string) => {
 
   const ssdMobilenet = createResultSenderService<
     [number[], number[], number[], number[]]
-  >('${baseUrl}/ssd-mobilenet');
+  >(`${baseUrl}/ssd-mobilenet`);
 
   const deeplabv3 = createResultSenderService<number[] | number[][]>(
-    '${baseUrl}/deeplabv3'
+    `${baseUrl}/deeplabv3`
   );
 
   const sendSSDMobilenetResults = async (

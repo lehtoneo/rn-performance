@@ -43,7 +43,10 @@
         "backgroundColor": "#ffffff"
       },
       "package": "fi.lehtoneo.rnperformance",
-      "permissions": ["android.permission.INTERNET"]
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_WIFI_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
