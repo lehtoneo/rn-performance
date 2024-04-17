@@ -7,6 +7,16 @@ import { localIP } from './dataService';
 
 import { Model } from '../hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 
+export enum Delegate {
+  CPU = 'cpu',
+  GPU = 'gpu',
+  NNAPI = 'nnapi',
+  METAL = 'metal',
+  COREML = 'core_ml',
+  WEBGL = 'webgl',
+  OPENGL = 'opengl',
+  XNNPACK = 'xnnpack'
+}
 type SendResultsCommonOpts<T> = {
   resultsId: string;
   inputIndex: number;
@@ -15,14 +25,7 @@ type SendResultsCommonOpts<T> = {
   output: T;
   inferenceTimeMs: number;
   model: Model;
-  delegate:
-    | 'cpu'
-    | 'nnapi'
-    | 'metal'
-    | 'core_ml'
-    | 'webgl'
-    | 'opengl'
-    | 'xnnpack';
+  delegate: Delegate;
 };
 
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
@@ -103,9 +106,9 @@ const createResultService = (uri: string) => {
 
   const mobileNet = createResultSenderService<number[]>(`${baseUrl}/mobilenet`);
 
-  const ssdMobilenet = createResultSenderService<
-    [number[], number[], number[], number[]]
-  >(`${baseUrl}/ssd-mobilenet`);
+  const ssdMobilenet = createResultSenderService<[]>(
+    `${baseUrl}/ssd-mobilenet`
+  );
 
   const deeplabv3 = createResultSenderService<number[] | number[][]>(
     `${baseUrl}/deeplabv3`
