@@ -137,12 +137,12 @@ const Onnx = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Fixed input index</Text>
+      <Text>Run for all</Text>
 
       <Button
         title="T"
         onPress={() => {
-          onnxMLPerformanceRunnerService.run({
+          onnxMLPerformanceRunnerService.runForAllAsync({
             model: 'mobilenetv2',
             inputPrecision: 'float32',
             delegate: Delegate.NNAPI
