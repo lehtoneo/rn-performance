@@ -154,13 +154,18 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
     ] as Model[];
     const precsisions = ['float32', 'int8'] as ModelInputPrecision[];
     const delegates = Object.values(Delegate);
+
     for (const model of models) {
       for (const precision of precsisions) {
         for (const delegate of delegates) {
-          try {
-            await run({ model, inputPrecision: precision, delegate });
-          } catch (e) {
-            console.log(e);
+          var i = 0;
+          while (i < 5) {
+            try {
+              await run({ model, inputPrecision: precision, delegate });
+            } catch (e) {
+              i = 5;
+            }
+            i++;
           }
         }
       }

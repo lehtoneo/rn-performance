@@ -142,11 +142,7 @@ const Onnx = () => {
       <Button
         title="T"
         onPress={() => {
-          onnxMLPerformanceRunnerService.runForAllAsync({
-            model: 'mobilenetv2',
-            inputPrecision: 'float32',
-            delegate: Delegate.NNAPI
-          });
+          onnxMLPerformanceRunnerService.runForAllAsync();
         }}
       />
       <Text>{onnxRuntime.modelPath}</Text>
