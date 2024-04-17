@@ -98,7 +98,7 @@ const getHasResultsAlreadyAsync = async (data: SendResultsCommonOpts<any>) => {
     );
     return r.data === 'true';
   } catch (e) {
-    return true;
+    return false;
   }
 };
 

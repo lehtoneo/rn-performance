@@ -1,6 +1,9 @@
 import { ModelInputPrecision } from '../types';
+import { sleep } from '../util/promises';
+import { has } from 'lodash';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
+import { Platform } from 'react-native';
 
 import dataService, {
   CustomImageData,
@@ -58,6 +61,7 @@ const loadModelOptionsEqual = (a: LoadModelOptions, b: LoadModelOptions) => {
 
 function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
   libraryName: string;
+  libraryDelegates: Delegate[];
   loadModelAsync: (options: LoadModelOptions) => Promise<ModelT>;
   getFormattedInputsAsync: (
     options: LoadModelOptions,
@@ -75,6 +79,18 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
 }) {
   let _cachedData: DataT[] | null = null;
   let _cachedOptions: LoadModelOptions | null = null;
+
+  const getPlatformDelegates = () => {
+    if (Platform.OS === 'ios') {
+      return [Delegate.COREML, Delegate.METAL];
+    }
+
+    if (Platform.OS === 'android') {
+      return [Delegate.NNAPI];
+    }
+
+    throw new Error('Invalid platform');
+  };
 
   const run = async (options: LoadModelOptions) => {
     const model = await opts.loadModelAsync(options);
@@ -96,7 +112,6 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       output: []
     });
 
-    console.log({ model });
     if (hasResults) {
       return 'ok';
     }
@@ -119,7 +134,6 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       const end = performance.now();
 
       const time = end - start;
-      console.log({ time });
 
       var usedOut = out;
 
@@ -156,6 +170,7 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       i++;
     }
 
+    await opts.closeModelAsync(model);
     for (const r of results) {
       switch (options.model) {
         case 'mobilenetv2':
@@ -173,32 +188,35 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       }
     }
 
-    await opts.closeModelAsync(model);
-
     return 'ok';
   };
 
   const runForAllAsync = async () => {
-    const models = [
+    const models: Model[] = [
       'mobilenetv2',
       'mobilenet_edgetpu',
       'ssd_mobilenet',
       'deeplabv3'
-    ] as Model[];
-    const precsisions = ['float32', 'int8'] as ModelInputPrecision[];
-    const delegates = Object.values(Delegate);
+    ];
+    const precsisions: ModelInputPrecision[] = ['float32', 'uint8'];
+    const delegates = opts.libraryDelegates;
 
     for (const model of models) {
       for (const precision of precsisions) {
         for (const delegate of delegates) {
           var i = 0;
-          while (i < 1) {
+          console.log({ model, precision, delegate });
+          while (i < 5) {
             try {
               await run({ model, inputPrecision: precision, delegate });
             } catch (e) {
-              i = 5;
+              break;
             }
             i++;
+          }
+          if (i > 0) {
+            console.log('Sleeping');
+            await sleep(1000);
           }
         }
       }
@@ -216,6 +234,12 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   any
 >({
   libraryName: 'onnxruntime',
+  libraryDelegates: [
+    Delegate.NNAPI,
+    Delegate.CPU,
+    Delegate.COREML,
+    Delegate.XNNPACK
+  ],
   loadModelAsync: async (options: LoadModelOptions) => {
     const model = await modelService.loadModelAsync(
       options.model,
@@ -224,9 +248,6 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
     );
 
     try {
-      console.log(
-        `${options.model} ${options.inputPrecision} ${options.delegate}`
-      );
       const session = await InferenceSession.create(model, {
         executionProviders: [
           options.delegate === Delegate.COREML ? 'coreml' : options.delegate
@@ -235,6 +256,8 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
 
       return session;
     } catch (e: any) {
+      console.log('Error loading model');
+      console.log({ e });
       throw e;
     }
   },
@@ -251,7 +274,6 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
       return numberArray;
     },
     formatMobileNetOutput: function (output, model) {
-      console.log({ output });
       const t2 = model.outputNames[0] || '';
       const t = output[t2] as any;
       const d = t.cpuData as number[];
@@ -281,10 +303,10 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   },
   getFormattedInputsAsync: async function (options, model): Promise<any[]> {
     const inputDimensions = getModelDataDimensions(options.model);
-    const maxAmount = 10;
+    const maxAmount = options.model === 'deeplabv3' ? 100 : 300;
     let i = 0;
     const chunkAmount = 10;
-
+    console.log('Fetching data');
     let arr: FetchImageNetResult = [];
     while (i * chunkAmount < maxAmount) {
       const d = await getFetchFn(options.model)({
@@ -295,6 +317,7 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
       arr = [...arr, ...d];
       i++;
     }
+    console.log('Fetched data');
     const data = arr;
 
     const usedData = data.map((d) => {
@@ -314,6 +337,7 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
     return await model.run(data);
   },
   closeModelAsync: async function (model: InferenceSession): Promise<void> {
+    model.endProfiling();
     await model.release();
   }
 });
