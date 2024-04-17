@@ -13,6 +13,10 @@
     "userInterfaceStyle": "light",
     "plugins": [
       [
+        "expo-build-properties",
+        { "android": { "usesCleartextTraffic": true } }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermissions": "Allow rn-performance to access your camera."
