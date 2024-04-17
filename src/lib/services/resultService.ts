@@ -92,11 +92,13 @@ function createResultSenderService<T>(uri: string) {
 const getHasResultsAlreadyAsync = async (data: SendResultsCommonOpts<any>) => {
   try {
     const d = getFullOpts(data);
-    const r = await axios.post<string>(
+    const r = await axios.post<any>(
       `http://${localIP}:3000/api/results/has-results`,
       d
     );
-    return r.data === 'true';
+
+    const r2 = r.data === 'true' || r.data === true;
+    return r2;
   } catch (e) {
     return false;
   }
