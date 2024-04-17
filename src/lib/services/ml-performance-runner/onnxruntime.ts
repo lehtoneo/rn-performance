@@ -1,8 +1,10 @@
 import { FetchImageNetResult } from '../dataService';
 import { modelService } from '../modelService';
 import { Delegate } from '../resultService';
+import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
+import { Platform } from 'react-native';
 
 import {
   LoadModelOptions,
@@ -10,8 +12,46 @@ import {
   fetchDataInChunks,
   getFetchFn
 } from './common';
+import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
+import { ModelInputPrecision } from '@/lib/types';
 
 import { getModelDataDimensions } from '../../hooks/data/useModelData';
+
+const models: Record<Model, Record<ModelInputPrecision, any>> = {
+  mobilenetv2: {
+    uint8: require('../../../../assets/models/mlperf/onnx/mobilenetv2_uint8.onnx'),
+    float32: require('../../../../assets/models/mlperf/onnx/mobilenetv2_float32.onnx')
+  },
+  mobilenet_edgetpu: {
+    uint8: require('../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_uint8.onnx'),
+    float32: require('../../../../assets/models/mlperf/onnx/mobilenet_edgetpu_224_1.0_float32.onnx')
+  },
+  ssd_mobilenet: {
+    uint8: require('../../../../assets/models/mlperf/onnx/ssd_mobilenet_v2_300_uint8.onnx'),
+    float32: require('../../../../assets/models/mlperf/onnx/ssd_mobilenet_v2_300_float.onnx')
+  },
+  deeplabv3: {
+    uint8: require('../../../../assets/models/mlperf/onnx/deeplabv3_mnv2_ade20k_uint8.onnx'),
+    float32: require('../../../../assets/models/mlperf/onnx/deeplabv3_mnv2_ade20k_float.onnx')
+  }
+};
+
+const getModelAsync = async (options: LoadModelOptions) => {
+  if (Platform.OS === 'ios') {
+    return modelService.loadModelAsync(
+      options.model,
+      options.inputPrecision,
+      'onnx'
+    );
+  } else if (Platform.OS === 'android') {
+    const model = models[options.model][options.inputPrecision];
+    const [{ localUri }] = await Asset.loadAsync(model);
+
+    // Get the URI of the asset
+    return localUri!;
+  }
+  throw new Error('Invalid platform');
+};
 
 export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   InferenceSession,
@@ -26,14 +66,10 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
     Delegate.XNNPACK
   ],
   loadModelAsync: async (options: LoadModelOptions) => {
-    const model = await modelService.loadModelAsync(
-      options.model,
-      options.inputPrecision,
-      'onnx'
-    );
+    const model = await getModelAsync(options);
 
     try {
-      const session = await InferenceSession.create(model, {
+      const session = await InferenceSession.create(model as any, {
         executionProviders: [
           options.delegate === Delegate.COREML ? 'coreml' : options.delegate
         ]
