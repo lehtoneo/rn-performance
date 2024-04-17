@@ -154,7 +154,7 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(opts: {
     });
 
     if (hasResults) {
-      return 'ok';
+      throw new Error('Results already exist');
     }
 
     const d =

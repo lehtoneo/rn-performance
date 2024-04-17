@@ -7,6 +7,7 @@ import {
   MLPerformanceRunnerService
 } from '@/lib/services/ml-performance-runner/common';
 import { ModelInputPrecision } from '@/lib/types';
+import { sleep } from '@/lib/util/promises';
 
 const models: Model[] = [
   'mobilenetv2',
@@ -31,10 +32,11 @@ export const useMLPerformanceRunner = (s: MLPerformanceRunnerService) => {
       try {
         await s.run(LoadModelOptions);
       } catch (e) {
-        break;
+        return false;
       }
       i++;
     }
+    return true;
   };
 
   const runForAllAsync = async () => {
@@ -48,8 +50,9 @@ export const useMLPerformanceRunner = (s: MLPerformanceRunnerService) => {
             delegate
           };
           setCurrentLoadModelOptions(LoadModelOptions);
-          await runOne(LoadModelOptions);
+          const error = await runOne(LoadModelOptions);
           setPerformedRuns((prev) => [...prev, LoadModelOptions]);
+          await sleep(10000);
         }
       }
     }
