@@ -48,6 +48,14 @@ type LoadModelOptions = {
   delegate: Delegate;
 };
 
+const loadModelOptionsEqual = (a: LoadModelOptions, b: LoadModelOptions) => {
+  return (
+    a.model === b.model &&
+    a.inputPrecision === b.inputPrecision &&
+    a.delegate === b.delegate
+  );
+};
+
 function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
   libraryName: string;
   loadModelAsync: (options: LoadModelOptions) => Promise<ModelT>;
@@ -65,12 +73,14 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
   };
   onAfterInputRun?: (data: any) => Promise<any>;
 }) {
+  let _cachedData: DataT[] | null = null;
+  let _cachedOptions: LoadModelOptions | null = null;
+
   const run = async (options: LoadModelOptions) => {
     const model = await opts.loadModelAsync(options);
 
-    const d = await opts.getFormattedInputsAsync(options, model);
-
     const resultsId = new Date().getTime().toString();
+
     const commonOpts = {
       resultsId: resultsId,
       model: options.model,
@@ -78,6 +88,29 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       delegate: options.delegate,
       library: opts.libraryName
     };
+
+    const hasResults = await resultService.getHasResultsAlreadyAsync({
+      ...commonOpts,
+      inputIndex: 0,
+      inferenceTimeMs: 0,
+      output: []
+    });
+
+    console.log({ model });
+    if (hasResults) {
+      return 'ok';
+    }
+
+    const d =
+      _cachedOptions &&
+      loadModelOptionsEqual(options, _cachedOptions) &&
+      _cachedData
+        ? _cachedData
+        : await opts.getFormattedInputsAsync(options, model);
+
+    _cachedData = d;
+    _cachedOptions = options;
+
     const results = [];
     var i = 0;
     for (const data of d) {
@@ -159,7 +192,7 @@ function createMLPerformanceRunnerService<ModelT, DataT>(opts: {
       for (const precision of precsisions) {
         for (const delegate of delegates) {
           var i = 0;
-          while (i < 5) {
+          while (i < 1) {
             try {
               await run({ model, inputPrecision: precision, delegate });
             } catch (e) {
@@ -190,13 +223,20 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
       'onnx'
     );
 
-    const session = await InferenceSession.create(model, {
-      executionProviders: [
-        options.delegate === Delegate.COREML ? 'coreml' : options.delegate
-      ]
-    });
+    try {
+      console.log(
+        `${options.model} ${options.inputPrecision} ${options.delegate}`
+      );
+      const session = await InferenceSession.create(model, {
+        executionProviders: [
+          options.delegate === Delegate.COREML ? 'coreml' : options.delegate
+        ]
+      });
 
-    return session;
+      return session;
+    } catch (e: any) {
+      throw e;
+    }
   },
   outputFormatting: {
     formatMobileNetEdgeTPUOutput: function (output, model) {
@@ -241,9 +281,9 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   },
   getFormattedInputsAsync: async function (options, model): Promise<any[]> {
     const inputDimensions = getModelDataDimensions(options.model);
-    const maxAmount = options.model === 'deeplabv3' ? 100 : 300;
+    const maxAmount = 10;
     let i = 0;
-    const chunkAmount = maxAmount < 20 ? maxAmount : 50;
+    const chunkAmount = 10;
 
     let arr: FetchImageNetResult = [];
     while (i * chunkAmount < maxAmount) {

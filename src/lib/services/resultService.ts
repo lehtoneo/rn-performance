@@ -28,14 +28,18 @@ type SendResultsCommonOpts<T> = {
   delegate: Delegate;
 };
 
+const getFullOpts = <T>(opts: SendResultsCommonOpts<T>) => {
+  return {
+    ...opts,
+    platform: Platform.OS,
+    deviceModelName: Device.modelName,
+    frameWork: 'react-native'
+  };
+};
+
 const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
   try {
-    const d = {
-      ...opts,
-      platform: Platform.OS,
-      deviceModelName: Device.modelName,
-      frameWork: 'react-native'
-    };
+    const d = getFullOpts(opts);
     const r = await axios.post<{ correct: boolean }>(`${uri}`, d);
     return r.data;
   } catch (e) {
@@ -50,12 +54,7 @@ const sendMultipleResultsToApi = async <T>(
 ) => {
   try {
     const d = opts.map((o) => {
-      return {
-        ...o,
-        platform: Platform.OS,
-        deviceModelName: Device.modelName,
-        frameWork: 'react-native'
-      };
+      return getFullOpts(o);
     });
     const r = await axios.post<{ correct: boolean }>(`${uri}/multiple`, d);
     return r.data;
@@ -89,6 +88,19 @@ function createResultSenderService<T>(uri: string) {
     sendMultipleResults
   };
 }
+
+const getHasResultsAlreadyAsync = async (data: SendResultsCommonOpts<any>) => {
+  try {
+    const d = getFullOpts(data);
+    const r = await axios.post<string>(
+      `http://${localIP}:3000/api/results/has-results`,
+      d
+    );
+    return r.data === 'true';
+  } catch (e) {
+    return true;
+  }
+};
 
 const createResultService = (uri: string) => {
   const baseUrl = `${uri}/results`;
@@ -142,7 +154,8 @@ const createResultService = (uri: string) => {
     deeplabv3,
     sendImageNetResults: sendMobileNetResults,
     sendSSDMobilenetResults,
-    sendDeeplabv3Results
+    sendDeeplabv3Results,
+    getHasResultsAlreadyAsync
   };
 };
 
