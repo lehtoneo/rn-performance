@@ -163,7 +163,7 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(opts: {
       _cachedData
         ? _cachedData
         : await opts.getFormattedInputsAsync(options, model, {
-            maxAmount: 10
+            maxAmount: options.model === 'deeplabv3' ? 100 : 300
           });
 
     _cachedData = d;
