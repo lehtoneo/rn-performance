@@ -77,7 +77,7 @@ const Onnx = () => {
       const common = {
         inputIndex: o.index,
         precision: modelInputPrecision,
-        library: 'onnxruntime-react-native',
+        library: 'onnxruntime',
         resultsId: o.runId,
         delegate: executionProvider as any
       };
