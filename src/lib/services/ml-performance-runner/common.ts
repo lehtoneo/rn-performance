@@ -134,8 +134,6 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(opts: {
   };
 
   const run = async (options: LoadModelOptions) => {
-    const model = await opts.loadModelAsync(options);
-
     const resultsId = new Date().getTime().toString();
 
     const commonOpts = {
@@ -156,6 +154,8 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(opts: {
     if (hasResults) {
       throw new Error('Results already exist');
     }
+
+    const model = await opts.loadModelAsync(options);
 
     const d =
       _cachedOptions &&
