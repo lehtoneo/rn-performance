@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
+import PerformanceRunnerScreen from '@/components/performance-evaluating/PerformanceRunnerScreen';
 import RadioGroup from '@/components/tests/radio-group';
 
 import useModelData, {
@@ -21,9 +22,10 @@ import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime, {
   OnnxRuntimeExecutionProvider
 } from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
+import { useMLPerformanceRunner } from '@/lib/hooks/performance/useMLPerformanceRunner';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
+import { onnxMLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/onnxruntime';
 import { Delegate, resultService } from '@/lib/services/resultService';
-import { onnxMLPerformanceRunnerService } from '@/lib/services/test';
 import { ModelInputPrecision } from '@/lib/types';
 import validationUtil from '@/lib/util/validationUtil';
 
@@ -135,9 +137,11 @@ const Onnx = () => {
 
   const t = Object.values(OnnxRuntimeExecutionProvider);
 
+  const x = useMLPerformanceRunner(onnxMLPerformanceRunnerService);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Run for all</Text>
+      <PerformanceRunnerScreen useMLPerformanceRunner={x} />
 
       <Button
         title="T"
