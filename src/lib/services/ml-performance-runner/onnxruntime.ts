@@ -6,12 +6,9 @@ import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
 import { Platform } from 'react-native';
 
-import {
-  LoadModelOptions,
-  createMLPerformanceRunnerService,
-  fetchDataInChunks,
-  getFetchFn
-} from './common';
+import { createMLPerformanceRunnerService } from './common';
+import { fetchDataInChunks } from './common/util';
+import { LoadModelOptions } from './types';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import { ModelInputPrecision } from '@/lib/types';
 

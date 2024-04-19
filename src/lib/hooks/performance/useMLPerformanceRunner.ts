@@ -2,10 +2,8 @@ import { Model } from '../ml/fast-tf-lite/useReactNativeFastTfLite';
 import { load } from '@tensorflow-models/coco-ssd';
 import { useState } from 'react';
 
-import {
-  LoadModelOptions,
-  MLPerformanceRunnerService
-} from '@/lib/services/ml-performance-runner/common';
+import { MLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/common';
+import { LoadModelOptions } from '@/lib/services/ml-performance-runner/types';
 import { ModelInputPrecision } from '@/lib/types';
 import { sleep } from '@/lib/util/promises';
 

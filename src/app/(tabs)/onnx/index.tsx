@@ -143,12 +143,6 @@ const Onnx = () => {
     <SafeAreaView style={styles.container}>
       <PerformanceRunnerScreen useMLPerformanceRunner={x} />
 
-      <Button
-        title="T"
-        onPress={() => {
-          onnxMLPerformanceRunnerService.runForAllAsync();
-        }}
-      />
       <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
         {onnxRuntime.modelLoadError && (

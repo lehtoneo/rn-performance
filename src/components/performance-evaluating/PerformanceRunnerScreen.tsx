@@ -1,7 +1,7 @@
 import { Button, Text, View } from 'react-native';
 
 import { UseMLPerformanceRunner } from '@/lib/hooks/performance/useMLPerformanceRunner';
-import { LoadModelOptions } from '@/lib/services/ml-performance-runner/common';
+import { LoadModelOptions } from '@/lib/services/ml-performance-runner/types';
 
 type Props = {
   useMLPerformanceRunner: UseMLPerformanceRunner;
