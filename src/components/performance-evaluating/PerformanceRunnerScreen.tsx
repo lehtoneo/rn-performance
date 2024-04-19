@@ -1,3 +1,4 @@
+import { useKeepAwake } from '@sayem314/react-native-keep-awake';
 import { View } from 'react-native';
 
 import PerformanceSpeedRunner from './PerformanceSpeedRunner';
@@ -8,6 +9,7 @@ type Props = {
 };
 
 const PerformanceRunnerScreen = (props: Props) => {
+  useKeepAwake();
   return (
     <View style={{ gap: 16 }}>
       <PerformanceSpeedRunner service={props.service} />
