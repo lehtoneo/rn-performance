@@ -15,7 +15,7 @@ const models: Model[] = [
 ];
 const precsisions: ModelInputPrecision[] = ['float32', 'uint8'];
 
-export const useMLPerformanceRunner = (s: MLPerformanceRunnerService) => {
+export const useMLPerformanceSpeedRunner = (s: MLPerformanceRunnerService) => {
   const delegates = s.getDelegates();
   const [running, setRunning] = useState<boolean>(false);
   const [runI, setRunI] = useState<number>(0);
@@ -28,7 +28,7 @@ export const useMLPerformanceRunner = (s: MLPerformanceRunnerService) => {
     while (i < 3) {
       setRunI(i);
       try {
-        await s.run(LoadModelOptions);
+        await s.speedRunner.run(LoadModelOptions);
       } catch (e) {
         return false;
       }
@@ -67,4 +67,6 @@ export const useMLPerformanceRunner = (s: MLPerformanceRunnerService) => {
   };
 };
 
-export type UseMLPerformanceRunner = ReturnType<typeof useMLPerformanceRunner>;
+export type UseMLPerformanceRunner = ReturnType<
+  typeof useMLPerformanceSpeedRunner
+>;

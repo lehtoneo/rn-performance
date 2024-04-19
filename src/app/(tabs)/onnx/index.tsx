@@ -22,7 +22,7 @@ import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime, {
   OnnxRuntimeExecutionProvider
 } from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
-import { useMLPerformanceRunner } from '@/lib/hooks/performance/useMLPerformanceRunner';
+import { useMLPerformanceSpeedRunner } from '@/lib/hooks/performance/useMLPerformanceSpeedRunner';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { onnxMLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/onnxruntime';
 import { Delegate, resultService } from '@/lib/services/resultService';
@@ -137,11 +137,9 @@ const Onnx = () => {
 
   const t = Object.values(OnnxRuntimeExecutionProvider);
 
-  const x = useMLPerformanceRunner(onnxMLPerformanceRunnerService);
-
   return (
     <SafeAreaView style={styles.container}>
-      <PerformanceRunnerScreen useMLPerformanceRunner={x} />
+      <PerformanceRunnerScreen service={onnxMLPerformanceRunnerService} />
 
       <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>

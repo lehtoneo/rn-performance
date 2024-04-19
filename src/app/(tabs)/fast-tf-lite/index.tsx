@@ -21,7 +21,7 @@ import useReactNativeFastTfLite, {
   FastTFLiteModelDelegate,
   Model
 } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
-import { useMLPerformanceRunner } from '@/lib/hooks/performance/useMLPerformanceRunner';
+import { useMLPerformanceSpeedRunner } from '@/lib/hooks/performance/useMLPerformanceSpeedRunner';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
 import { fastTfLiteMLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/fast-tf-lite';
 import { resultService } from '@/lib/services/resultService';
@@ -108,12 +108,12 @@ export default function App(): React.ReactNode {
     data: modelData.data ? modelData.data.map((d) => [d.array]) : null
   });
 
-  const x = useMLPerformanceRunner(fastTfLiteMLPerformanceRunnerService);
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <PerformanceRunnerScreen useMLPerformanceRunner={x} />
+        <PerformanceRunnerScreen
+          service={fastTfLiteMLPerformanceRunnerService}
+        />
         <Text>Uses lodash</Text>
         <Text>Delegate</Text>
         <RadioGroup<FastTFLiteModelDelegate>

@@ -29,7 +29,7 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(
   const speedRunner = createMLPerformanceSpeedRunner(opts);
   const resources = createMLPerformanceResourceRunner(opts);
   return {
-    ...speedRunner,
+    speedRunner,
     resources,
     getDelegates
   };
