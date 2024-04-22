@@ -17,29 +17,67 @@ export enum Delegate {
   OPENGL = 'opengl',
   XNNPACK = 'xnnpack'
 }
-type SendResultsCommonOpts<T> = {
+
+type SendResultsApiMetadata = {
   resultsId: string;
-  inputIndex: number;
+  platform: string;
+  deviceModelName: string;
+  frameWork: string;
   precision: ModelInputPrecision;
   library: string;
-  output: T;
-  inferenceTimeMs: number;
   model: Model;
   delegate: Delegate;
 };
 
-const getFullOpts = <T>(opts: SendResultsCommonOpts<T>) => {
+type SendSpeedResultsApiOpts<T> = SendResultsApiMetadata & {
+  inputIndex: number;
+  output: T;
+  inferenceTimeMs: number;
+};
+
+type SendResultsMetadata = Omit<
+  SendResultsApiMetadata,
+  'platform' | 'deviceModelName' | 'frameWork'
+>;
+
+type SendSpeedResultsOpts<T> = SendResultsMetadata & {
+  inputIndex: number;
+  output: T;
+  inferenceTimeMs: number;
+};
+
+type SendBatteryResultsApiOpts = SendResultsMetadata & {
+  batteryStartLevel: number;
+  batteryEndLevel: number;
+  timeMs: number;
+};
+
+const getFullSpeedOpts = <T>(
+  opts: SendSpeedResultsOpts<T>
+): SendSpeedResultsApiOpts<T> => {
   return {
     ...opts,
     platform: Platform.OS,
-    deviceModelName: Device.modelName,
+    deviceModelName: Device.modelName!,
     frameWork: 'react-native'
   };
 };
 
-const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
+const getFullBatteryOpts = (data: SendBatteryResultsApiOpts) => {
+  return {
+    ...data,
+    platform: Platform.OS,
+    deviceModelName: Device.modelName!,
+    frameWork: 'react-native'
+  };
+};
+
+const sendSpeedResults = async <T>(
+  uri: string,
+  opts: SendSpeedResultsOpts<T>
+) => {
   try {
-    const d = getFullOpts(opts);
+    const d = getFullSpeedOpts(opts);
     const r = await axios.post<{ correct: boolean }>(`${uri}`, d);
     return r.data;
   } catch (e) {
@@ -48,13 +86,26 @@ const sendResults = async <T>(uri: string, opts: SendResultsCommonOpts<T>) => {
   }
 };
 
+const sendBatteryResults = async (opts: SendBatteryResultsApiOpts) => {
+  try {
+    const uri = `http://${localIP}:3000/api/results/battery`;
+    const d = getFullBatteryOpts(opts);
+    const r = await axios.post(uri, d);
+    return r.data;
+  } catch (e) {
+    console.log('???');
+    console.log(e);
+    console.log('error');
+  }
+};
+
 const sendMultipleResultsToApi = async <T>(
   uri: string,
-  opts: SendResultsCommonOpts<T>[]
+  opts: SendSpeedResultsOpts<T>[]
 ) => {
   try {
     const d = opts.map((o) => {
-      return getFullOpts(o);
+      return getFullSpeedOpts(o);
     });
     const r = await axios.post<{ correct: boolean }>(`${uri}/multiple`, d);
     return r.data;
@@ -65,16 +116,16 @@ const sendMultipleResultsToApi = async <T>(
 };
 
 function createResultSenderService<T>(uri: string) {
-  const sendOneResult = async (opts: SendResultsCommonOpts<T>) => {
+  const sendOneResult = async (opts: SendSpeedResultsOpts<T>) => {
     try {
-      return await sendResults(uri, opts);
+      return await sendSpeedResults(uri, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
     }
   };
 
-  const sendMultipleResults = async (opts: SendResultsCommonOpts<T>[]) => {
+  const sendMultipleResults = async (opts: SendSpeedResultsOpts<T>[]) => {
     try {
       return await sendMultipleResultsToApi(uri, opts);
     } catch (e) {
@@ -89,11 +140,28 @@ function createResultSenderService<T>(uri: string) {
   };
 }
 
-const getHasResultsAlreadyAsync = async (data: SendResultsCommonOpts<any>) => {
+const getHasResultsAlreadyAsync = async (data: SendSpeedResultsOpts<any>) => {
   try {
-    const d = getFullOpts(data);
+    const d = getFullSpeedOpts(data);
     const r = await axios.post<any>(
       `http://${localIP}:3000/api/results/has-results`,
+      d
+    );
+
+    const r2 = r.data === 'true' || r.data === true;
+    return r2;
+  } catch (e) {
+    return false;
+  }
+};
+
+const getHasBatteryResultsAlreadyAsync = async (
+  data: SendBatteryResultsApiOpts
+) => {
+  try {
+    const d = getFullBatteryOpts(data);
+    const r = await axios.post<any>(
+      `http://${localIP}:3000/api/results/has-results/battery`,
       d
     );
 
@@ -107,11 +175,9 @@ const getHasResultsAlreadyAsync = async (data: SendResultsCommonOpts<any>) => {
 const createResultService = (uri: string) => {
   const baseUrl = `${uri}/results`;
 
-  const sendMobileNetResults = async (
-    opts: SendResultsCommonOpts<number[]>
-  ) => {
+  const sendMobileNetResults = async (opts: SendSpeedResultsOpts<number[]>) => {
     try {
-      return await sendResults(`${baseUrl}/mobilenet`, opts);
+      return await sendSpeedResults(`${baseUrl}/mobilenet`, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
@@ -129,10 +195,10 @@ const createResultService = (uri: string) => {
   );
 
   const sendSSDMobilenetResults = async (
-    opts: SendResultsCommonOpts<[number[], number[], number[], number[]]>
+    opts: SendSpeedResultsOpts<[number[], number[], number[], number[]]>
   ) => {
     try {
-      return await sendResults(`${baseUrl}/ssd-mobilenet`, opts);
+      return await sendSpeedResults(`${baseUrl}/ssd-mobilenet`, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
@@ -140,10 +206,10 @@ const createResultService = (uri: string) => {
   };
 
   const sendDeeplabv3Results = async (
-    opts: SendResultsCommonOpts<number[] | number[][]>
+    opts: SendSpeedResultsOpts<number[] | number[][]>
   ) => {
     try {
-      return await sendResults(`${baseUrl}/deeplabv3`, opts);
+      return await sendSpeedResults(`${baseUrl}/deeplabv3`, opts);
     } catch (e) {
       console.log(e);
       console.log('error');
@@ -157,7 +223,9 @@ const createResultService = (uri: string) => {
     sendImageNetResults: sendMobileNetResults,
     sendSSDMobilenetResults,
     sendDeeplabv3Results,
-    getHasResultsAlreadyAsync
+    getHasResultsAlreadyAsync,
+    getHasBatteryResultsAlreadyAsync,
+    sendBatteryResults
   };
 };
 

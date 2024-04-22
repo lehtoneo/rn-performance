@@ -2,7 +2,8 @@ import SelectDelegate from '../SelectDelegate';
 import SelectInputPrecision from '../SelectInputPrecision';
 import SelectLoadModelOptions from '../SelectLoadModelOptions';
 import SelectModel from '../SelectModel';
-import { Button, View } from 'react-native';
+import { useBatteryLevel } from 'expo-battery';
+import { Button, Text, TextInput, View } from 'react-native';
 
 import { useMLPerformanceResourcesRunner } from '@/lib/hooks/performance/useMLPerformanceResourcesRunner';
 import { MLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/common';
@@ -13,12 +14,20 @@ type Props = {
 
 const PerformanceResourcesRunner = (props: Props) => {
   const resourcesRunner = useMLPerformanceResourcesRunner(props.service);
+  const batteryLevel = useBatteryLevel();
   return (
-    <View style={{ gap: 16, backgroundColor: 'blue', padding: 16 }}>
-      <SelectLoadModelOptions
-        delegateOptions={resourcesRunner.delegates}
-        value={resourcesRunner.state.LoadModelOptions}
-        onChange={resourcesRunner.state.setLoadModelOptions}
+    <View style={{ gap: 16, padding: 16 }}>
+      <Text>Battery: {batteryLevel}</Text>
+      <Text>Times</Text>
+      <Text style={{ color: 'red' }}>{resourcesRunner.state.error}</Text>
+      <TextInput
+        style={{ backgroundColor: 'white', padding: 20 }}
+        value={resourcesRunner.state.times.toString()}
+        onChangeText={(text) => {
+          text = text.replace(/[^0-9]/g, '');
+          resourcesRunner.state.setTimes(parseInt(text));
+        }}
+        keyboardType="numeric"
       />
       <Button
         title="Run Resources test!"

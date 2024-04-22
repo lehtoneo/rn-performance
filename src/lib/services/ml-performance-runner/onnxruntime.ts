@@ -55,7 +55,7 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   any,
   any
 >({
-  libraryName: 'onnxruntime',
+  libraryName: 'onnxruntime-react-native',
   libraryDelegates: [
     Delegate.NNAPI,
     Delegate.CPU,
