@@ -16,7 +16,10 @@ const PerformanceResourcesRunner = (props: Props) => {
   const resourcesRunner = useMLPerformanceResourcesRunner(props.service);
   const batteryLevel = useBatteryLevel();
   return (
-    <View style={{ gap: 16, padding: 16 }}>
+    <View
+      style={{ gap: 16, padding: 16, borderWidth: 1, borderColor: 'black' }}
+    >
+      <Text>{props.service.getLibraryName()}</Text>
       <Text>Battery: {batteryLevel}</Text>
       <Text>Times</Text>
       <Text style={{ color: 'red' }}>{resourcesRunner.state.error}</Text>

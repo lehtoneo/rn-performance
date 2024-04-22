@@ -31,7 +31,8 @@ export function createMLPerformanceRunnerService<ModelT, DataT, OutputT>(
   return {
     speedRunner,
     resources,
-    getDelegates
+    getDelegates,
+    getLibraryName: () => opts.libraryName
   };
 }
 

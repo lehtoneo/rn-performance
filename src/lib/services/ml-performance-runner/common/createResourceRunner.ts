@@ -40,24 +40,29 @@ export const createMLPerformanceResourceRunner = <ModelT, DataT, OutputT>(
     const d = await opts.getFormattedInputsAsync(options, model, {
       maxAmount: 1
     });
+    const minuteInMs = 60 * 1000;
+    // make sure the time is at least 1 minute
+    const sleepTime = minuteInMs + 10000;
+    console.log('Sleeping for', sleepTime, 'ms');
+    await sleep(sleepTime);
 
     const times = runOpts.times;
     const batteryBefore = await Battery.getBatteryLevelAsync();
     console.log({ batteryBefore });
     const startTimeMs = performance.now();
     for (let i = 0; i < times; i++) {
+      if (i % 100 === 0) {
+        console.log(`Running inference ${i} of ${times}`);
+      }
       await opts.runInfereceAsync(model, d[0]);
     }
     const endTimeMs = performance.now();
 
-    const timeInMs = endTimeMs - startTimeMs;
-    const minuteInMs = 60 * 1000;
-    // make sure the time is at least 1 minute (ios requires 1 minute to get accurate battery level)
-    const sleepTime = minuteInMs - timeInMs + 5000;
     // Wait for battery to stabilize (1 minute)
+    console.log('Sleeping for', sleepTime, 'ms');
     await sleep(sleepTime);
     const batteryAfter = await Battery.getBatteryLevelAsync();
-    console.log({ batteryBefore, batteryAfter });
+    console.log({ batteryAfter, batteryBefore });
     await resultService.sendBatteryResults({
       ...sendResultsOpts,
       batteryStartLevel: batteryBefore,

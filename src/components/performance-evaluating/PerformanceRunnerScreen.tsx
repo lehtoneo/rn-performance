@@ -14,7 +14,6 @@ const PerformanceRunnerScreen = (props: Props) => {
   return (
     <View style={{ gap: 16 }}>
       <PerformanceSpeedRunner service={props.service} />
-      <PerformanceResourcesRunner service={props.service} />
     </View>
   );
 };

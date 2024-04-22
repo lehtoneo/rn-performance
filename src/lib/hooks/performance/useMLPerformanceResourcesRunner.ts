@@ -9,6 +9,7 @@ const delegates: Delegate[] = Object.values(Delegate);
 export const useMLPerformanceResourcesRunner = (
   s: MLPerformanceRunnerService
 ) => {
+  const delegates = s.getDelegates();
   const [model, setModel] = useState<Model>('ssd_mobilenet');
   const [running, setRunning] = useState<boolean>(false);
   const [times, setTimes] = useState<number>(1000);
