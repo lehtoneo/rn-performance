@@ -139,10 +139,10 @@ const Onnx = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <PerformanceRunnerScreen service={onnxMLPerformanceRunnerService} />
-
-      <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
+        <PerformanceRunnerScreen service={onnxMLPerformanceRunnerService} />
+
+        <Text>{onnxRuntime.modelPath}</Text>
         {onnxRuntime.modelLoadError && (
           <Text
             style={{

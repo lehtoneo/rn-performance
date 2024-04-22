@@ -29,6 +29,12 @@ const PerformanceResourcesRunner = (props: Props) => {
         }}
         keyboardType="numeric"
       />
+      <SelectModel
+        value={resourcesRunner.state.model}
+        onChange={(val) => {
+          resourcesRunner.state.setModel(val!);
+        }}
+      />
       <Button
         title="Run Resources test!"
         onPress={resourcesRunner.run}

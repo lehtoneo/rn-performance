@@ -34,7 +34,7 @@ const PerformanceSpeedRunner = (props: Props) => {
       {performanceRunner.running && <Text>Running...</Text>}
 
       <Button
-        title="Run ALL!"
+        title="Run all speed tests!"
         onPress={performanceRunner.runForAllAsync}
         disabled={performanceRunner.running}
       />
