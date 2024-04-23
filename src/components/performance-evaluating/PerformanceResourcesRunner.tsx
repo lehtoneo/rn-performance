@@ -38,9 +38,16 @@ const PerformanceResourcesRunner = (props: Props) => {
           resourcesRunner.state.setModel(val!);
         }}
       />
+      <SelectDelegate
+        options={resourcesRunner.delegates}
+        value={resourcesRunner.state.delegate}
+        onChange={(val) => {
+          resourcesRunner.state.setDelegate(val);
+        }}
+      />
       <Button
-        title="Run Resources test!"
-        onPress={resourcesRunner.run}
+        title="Run all FP32 Resources test!"
+        onPress={resourcesRunner.runAllFP2}
         disabled={resourcesRunner.running}
       />
     </View>
