@@ -37,7 +37,7 @@
     "expo-status-bar": "~1.11.1",
     "expo-updates": "~0.24.11",
     "lodash": "^4.17.21",
-    "onnxruntime-react-native": "^1.17.1",
+    "onnxruntime-react-native": "1.17.1",
     "react": "18.2.0",
     "react-native": "0.73.4",
     "react-native-fast-tflite": "1.2.0",
