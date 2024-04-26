@@ -62,7 +62,7 @@ export const fetchDataInChunks = async (options: {
   return arr;
 };
 
-const getFetchFn = (model: Model | null) => {
+export const getFetchFn = (model: Model | null) => {
   switch (model) {
     case 'mobilenetv2':
       return async (query: FetchImagesQuery) =>

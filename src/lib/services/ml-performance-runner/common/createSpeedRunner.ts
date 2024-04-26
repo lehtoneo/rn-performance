@@ -1,13 +1,21 @@
 import { resultService } from '../../resultService';
 import { CreateMLPerformanceRunnerOpts, LoadModelOptions } from '../types';
 
-import { loadModelOptionsEqual } from './util';
+import { getFetchFn } from './util';
+import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 
 export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
   opts: CreateMLPerformanceRunnerOpts<ModelT, DataT, OutputT>
 ) => {
-  let _cachedData: DataT[] | null = null;
-  let _cachedOptions: LoadModelOptions | null = null;
+  const getMaxAmount = (model: Model) => {
+    switch (model) {
+      case 'deeplabv3':
+        return 100;
+      default:
+        return 300;
+    }
+  };
+
   const run = async (options: LoadModelOptions) => {
     const resultsId = new Date().getTime().toString();
 
@@ -32,79 +40,87 @@ export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
 
     const model = await opts.loadModelAsync(options);
 
-    const d =
-      _cachedOptions &&
-      loadModelOptionsEqual(options, _cachedOptions) &&
-      _cachedData
-        ? _cachedData
-        : await opts.getFormattedInputsAsync(options, model, {
-            maxAmount: options.model === 'deeplabv3' ? 100 : 300
-          });
+    const maxAmount = getMaxAmount(options.model);
 
-    _cachedData = d;
-    _cachedOptions = options;
+    const batchSize = 10;
 
-    const results = [];
-    var i = 0;
-    for (const data of d) {
-      const start = performance.now();
-      const out = await opts.runInfereceAsync(model, data);
-      const end = performance.now();
-
-      const time = end - start;
-
-      var usedOut = null;
-
-      switch (options.model) {
-        case 'mobilenetv2':
-          usedOut = opts.outputFormatting.formatMobileNetOutput(out, model);
-          break;
-        case 'mobilenet_edgetpu':
-          usedOut = opts.outputFormatting.formatMobileNetEdgeTPUOutput(
-            out,
-            model
-          );
-          break;
-        case 'ssd_mobilenet':
-          usedOut = opts.outputFormatting.formatSSDMobileNetOutput(out, model);
-          break;
-        case 'deeplabv3':
-          usedOut = opts.outputFormatting.formatDeepLabV3Output(out, model);
-          break;
-      }
-
-      if (opts.onAfterInputRun) {
-        await opts.onAfterInputRun(out);
-      }
-
-      results.push({
-        ...commonOpts,
-        output: usedOut as any,
-        inferenceTimeMs: time,
-        result: out,
-        inputIndex: i
+    for (var i = 0; i < maxAmount; ) {
+      const rawData = await getFetchFn(options.model)({
+        amount: batchSize,
+        skip: i,
+        type: options.inputPrecision
       });
 
-      i++;
+      const formatted = rawData.map((d) => opts.formatData(d, options, model));
+
+      var results = [];
+
+      for (const data of formatted) {
+        const start = performance.now();
+        const out = await opts.runInfereceAsync(model, data);
+        const end = performance.now();
+
+        const time = end - start;
+
+        var usedOut = null;
+
+        switch (options.model) {
+          case 'mobilenetv2':
+            usedOut = opts.outputFormatting.formatMobileNetOutput(out, model);
+            break;
+          case 'mobilenet_edgetpu':
+            usedOut = opts.outputFormatting.formatMobileNetEdgeTPUOutput(
+              out,
+              model
+            );
+            break;
+          case 'ssd_mobilenet':
+            usedOut = opts.outputFormatting.formatSSDMobileNetOutput(
+              out,
+              model
+            );
+            break;
+          case 'deeplabv3':
+            usedOut = opts.outputFormatting.formatDeepLabV3Output(out, model);
+            break;
+        }
+
+        results.push({
+          ...commonOpts,
+          output: usedOut as any,
+          inferenceTimeMs: time,
+          result: out,
+          inputIndex: i
+        });
+
+        if (opts.onAfterInputRun) {
+          await opts.onAfterInputRun(out);
+        }
+
+        i++;
+      }
+
+      for (const r of results) {
+        switch (options.model) {
+          case 'mobilenetv2':
+            await resultService.sendImageNetResults(r);
+            break;
+          case 'mobilenet_edgetpu':
+            await resultService.sendImageNetResults(r);
+            break;
+          case 'ssd_mobilenet':
+            await resultService.sendSSDMobilenetResults(r);
+            break;
+          case 'deeplabv3':
+            await resultService.sendDeeplabv3Results(r);
+            break;
+        }
+      }
+
+      results = [];
     }
 
     await opts.closeModelAsync(model);
-    for (const r of results) {
-      switch (options.model) {
-        case 'mobilenetv2':
-          await resultService.sendImageNetResults(r);
-          break;
-        case 'mobilenet_edgetpu':
-          await resultService.sendImageNetResults(r);
-          break;
-        case 'ssd_mobilenet':
-          await resultService.sendSSDMobilenetResults(r);
-          break;
-        case 'deeplabv3':
-          await resultService.sendDeeplabv3Results(r);
-          break;
-      }
-    }
 
     return 'ok';
   };

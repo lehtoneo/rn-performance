@@ -52,7 +52,9 @@ const getModelAsync = async (options: LoadModelOptions) => {
 
 export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
   InferenceSession,
-  any,
+  {
+    [key: string]: ort.Tensor;
+  },
   any
 >({
   libraryName: 'onnxruntime-react-native',
@@ -145,6 +147,18 @@ export const onnxMLPerformanceRunnerService = createMLPerformanceRunnerService<
       return myObject;
     });
     return usedData;
+  },
+  formatData: function (data, loadModelOptions, model) {
+    const inputDimensions = getModelDataDimensions(loadModelOptions.model);
+    const tensorA = new ort.Tensor(
+      loadModelOptions.inputPrecision,
+      data.array,
+      [1, ...inputDimensions]
+    );
+    const namedInput: { [key: string]: any } = {
+      [model!.inputNames![0]]: tensorA
+    };
+    return namedInput;
   },
   runInfereceAsync: async function (model: InferenceSession, data: any) {
     return await model.run(data);

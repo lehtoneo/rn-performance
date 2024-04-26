@@ -1,3 +1,4 @@
+import { CustomImageData } from '../dataService';
 import { Delegate } from '../resultService';
 
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
@@ -19,6 +20,11 @@ export interface CreateMLPerformanceRunnerOpts<ModelT, DataT, OutputT> {
       maxAmount: number;
     }
   ) => Promise<DataT[]>;
+  formatData: (
+    data: CustomImageData,
+    loadModelOptions: LoadModelOptions,
+    model: ModelT
+  ) => DataT;
   runInfereceAsync: (model: ModelT, data: DataT) => Promise<OutputT>;
   closeModelAsync: (model: ModelT) => Promise<void>;
   outputFormatting: {

@@ -1,4 +1,3 @@
-import { FetchImageNetResult } from '../dataService';
 import { Delegate } from '../resultService';
 import { TypedArray } from '@tensorflow/tfjs';
 import { TensorflowModel, loadTensorflowModel } from 'react-native-fast-tflite';
@@ -6,7 +5,6 @@ import { TensorflowModel, loadTensorflowModel } from 'react-native-fast-tflite';
 import { createMLPerformanceRunnerService } from './common';
 import { fetchDataInChunks } from './common/util';
 import { LoadModelOptions } from './types';
-import { getModelDataDimensions } from '@/lib/hooks/data/useModelData';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import { ModelInputPrecision } from '@/lib/types';
 
@@ -69,6 +67,9 @@ const createFastTfLiteMLPerformanceRunnerService = () => {
       });
 
       return d.map((d) => [d.array]);
+    },
+    formatData: function (data, _loadModelOptions, _model) {
+      return [data.array];
     },
     runInfereceAsync: async function (
       model: TensorflowModel,
