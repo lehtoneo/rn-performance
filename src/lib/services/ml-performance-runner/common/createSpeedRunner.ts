@@ -38,6 +38,8 @@ export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
       throw new Error('Results already exist');
     }
 
+    await tryRunInferenceThrows(options);
+
     const model = await opts.loadModelAsync(options);
 
     const maxAmount = getMaxAmount(options.model);
@@ -56,46 +58,49 @@ export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
       var results = [];
 
       for (const data of formatted) {
-        const start = performance.now();
-        const out = await opts.runInfereceAsync(model, data);
-        const end = performance.now();
+        // this is done on try catch block because in rare cases the model throws with certain inputs
+        try {
+          const start = performance.now();
+          const out = await opts.runInfereceAsync(model, data);
+          const end = performance.now();
 
-        const time = end - start;
+          const time = end - start;
 
-        var usedOut = null;
+          var usedOut = null;
 
-        switch (options.model) {
-          case 'mobilenetv2':
-            usedOut = opts.outputFormatting.formatMobileNetOutput(out, model);
-            break;
-          case 'mobilenet_edgetpu':
-            usedOut = opts.outputFormatting.formatMobileNetEdgeTPUOutput(
-              out,
-              model
-            );
-            break;
-          case 'ssd_mobilenet':
-            usedOut = opts.outputFormatting.formatSSDMobileNetOutput(
-              out,
-              model
-            );
-            break;
-          case 'deeplabv3':
-            usedOut = opts.outputFormatting.formatDeepLabV3Output(out, model);
-            break;
-        }
+          switch (options.model) {
+            case 'mobilenetv2':
+              usedOut = opts.outputFormatting.formatMobileNetOutput(out, model);
+              break;
+            case 'mobilenet_edgetpu':
+              usedOut = opts.outputFormatting.formatMobileNetEdgeTPUOutput(
+                out,
+                model
+              );
+              break;
+            case 'ssd_mobilenet':
+              usedOut = opts.outputFormatting.formatSSDMobileNetOutput(
+                out,
+                model
+              );
+              break;
+            case 'deeplabv3':
+              usedOut = opts.outputFormatting.formatDeepLabV3Output(out, model);
+              break;
+          }
 
-        results.push({
-          ...commonOpts,
-          output: usedOut as any,
-          inferenceTimeMs: time,
-          result: out,
-          inputIndex: i
-        });
+          results.push({
+            ...commonOpts,
+            output: usedOut as any,
+            inferenceTimeMs: time,
+            result: out,
+            inputIndex: i
+          });
 
-        if (opts.onAfterInputRun) {
-          await opts.onAfterInputRun(out);
-        }
+          if (opts.onAfterInputRun) {
+            await opts.onAfterInputRun(out);
+          }
+        } catch (e) {}
 
         i++;
       }
@@ -123,6 +128,27 @@ export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
     await opts.closeModelAsync(model);
 
     return 'ok';
+  };
+
+  const tryRunInferenceThrows = async (options: LoadModelOptions) => {
+    const model = await opts.loadModelAsync(options);
+    const rawData = await getFetchFn(options.model)({
+      amount: 1,
+      skip: 0,
+      type: options.inputPrecision
+    });
+
+    const formatted = rawData.map((d) => opts.formatData(d, options, model));
+
+    try {
+      const out = await opts.runInfereceAsync(model, formatted[0]);
+      if (opts.onAfterInputRun) {
+        await opts.onAfterInputRun(out);
+      }
+    } catch (e) {
+      await opts.closeModelAsync(model);
+      throw e;
+    }
   };
 
   return {
