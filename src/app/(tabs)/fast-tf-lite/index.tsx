@@ -115,6 +115,7 @@ export default function App(): React.ReactNode {
           service={fastTfLiteMLPerformanceRunnerService}
         />
         <Text>Uses lodash</Text>
+        <Text>Sync</Text>
         <Text>Delegate</Text>
         <RadioGroup<FastTFLiteModelDelegate>
           options={Object.values(FastTFLiteModelDelegate).map((v) => {

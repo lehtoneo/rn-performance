@@ -75,7 +75,7 @@ const createFastTfLiteMLPerformanceRunnerService = () => {
       model: TensorflowModel,
       data: any
     ): Promise<any> {
-      return await model.run(data);
+      return model.runSync(data);
     },
     closeModelAsync: async function (_model: TensorflowModel): Promise<void> {
       return;
