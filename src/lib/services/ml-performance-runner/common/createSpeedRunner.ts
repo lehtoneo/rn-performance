@@ -4,18 +4,18 @@ import { CreateMLPerformanceRunnerOpts, LoadModelOptions } from '../types';
 import { getFetchFn } from './util';
 import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 
+const getMaxAmountData = (model: Model) => {
+  switch (model) {
+    case 'deeplabv3':
+      return 100;
+    default:
+      return 300;
+  }
+};
+
 export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
   opts: CreateMLPerformanceRunnerOpts<ModelT, DataT, OutputT>
 ) => {
-  const getMaxAmount = (model: Model) => {
-    switch (model) {
-      case 'deeplabv3':
-        return 100;
-      default:
-        return 300;
-    }
-  };
-
   const run = async (options: LoadModelOptions) => {
     const resultsId = new Date().getTime().toString();
 
@@ -42,7 +42,7 @@ export const createMLPerformanceSpeedRunner = <ModelT, DataT, OutputT>(
 
     const model = await opts.loadModelAsync(options);
 
-    const maxAmount = getMaxAmount(options.model);
+    const maxAmount = getMaxAmountData(options.model);
 
     const batchSize = 10;
 
