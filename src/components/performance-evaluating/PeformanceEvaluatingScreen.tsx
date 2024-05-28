@@ -1,3 +1,5 @@
+import SelectInputPrecision from '../SelectInputPrecision';
+import SelectModel from '../SelectModel';
 import RadioGroup from '../tests/radio-group';
 import { useState } from 'react';
 import { Button, Text, View } from 'react-native';
@@ -27,47 +29,19 @@ const PerformanceEvaluatingScreen = (
     <View style={{ gap: 8 }}>
       <Text>Model</Text>
 
-      <RadioGroup<Model | null>
-        options={[
-          {
-            label: 'mobilenetv2',
-            value: 'mobilenetv2'
-          },
-          {
-            label: 'mobilenet_edgetpu',
-            value: 'mobilenet_edgetpu'
-          },
-          {
-            label: 'ssd_mobilenet',
-            value: 'ssd_mobilenet'
-          },
-          {
-            label: 'deeplabv3',
-            value: 'deeplabv3'
-          }
-        ]}
+      <SelectModel
         value={props.modelTypeProps.value}
-        onChange={(value) => props.modelTypeProps.onChange(value)}
+        onChange={props.modelTypeProps.onChange}
       />
 
       {props.modelInputPrecisionProps && (
         <>
           <Text>Input precision</Text>
-          <RadioGroup<ModelInputPrecision>
-            options={[
-              {
-                label: 'uint8',
-                value: 'uint8'
-              },
-              {
-                label: 'float32',
-                value: 'float32'
-              }
-            ]}
+          <SelectInputPrecision
             value={props.modelInputPrecisionProps.value}
-            onChange={(value) =>
-              props.modelInputPrecisionProps?.onChange(value)
-            }
+            onChange={(val) => {
+              props.modelInputPrecisionProps?.onChange(val);
+            }}
           />
         </>
       )}

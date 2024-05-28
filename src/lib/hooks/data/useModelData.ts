@@ -8,7 +8,7 @@ import dataService, {
 } from '@/lib/services/dataService';
 import { ModelInputPrecision } from '@/lib/types';
 
-export const useModelDataDimensions = (
+export const getModelDataDimensions = (
   model?: Model
 ): [number, number, number] => {
   switch (model) {
@@ -25,6 +25,12 @@ export const useModelDataDimensions = (
     default:
       throw new Error('Invalid model');
   }
+};
+
+export const useModelDataDimensions = (
+  model?: Model
+): [number, number, number] => {
+  return getModelDataDimensions(model);
 };
 
 const getFetchFn = (model: Model | null) => {

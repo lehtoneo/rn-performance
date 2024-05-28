@@ -2,9 +2,17 @@ import { Asset } from 'expo-asset';
 import { InferenceSession } from 'onnxruntime-react-native';
 import * as ort from 'onnxruntime-react-native';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Button,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
 
 import PerformanceEvaluatingScreen from '@/components/performance-evaluating/PeformanceEvaluatingScreen';
+import PerformanceRunnerScreen from '@/components/performance-evaluating/PerformanceRunnerScreen';
 import RadioGroup from '@/components/tests/radio-group';
 
 import useModelData, {
@@ -14,8 +22,10 @@ import { Model } from '@/lib/hooks/ml/fast-tf-lite/useReactNativeFastTfLite';
 import useOnnxRuntime, {
   OnnxRuntimeExecutionProvider
 } from '@/lib/hooks/ml/onnx-runtime/useOnnxRuntime';
+import { useMLPerformanceSpeedRunner } from '@/lib/hooks/performance/useMLPerformanceSpeedRunner';
 import useMLPerformanceEvaluator from '@/lib/hooks/performance/usePerformanceEvaluator';
-import { resultService } from '@/lib/services/resultService';
+import { onnxMLPerformanceRunnerService } from '@/lib/services/ml-performance-runner/onnxruntime';
+import { Delegate, resultService } from '@/lib/services/resultService';
 import { ModelInputPrecision } from '@/lib/types';
 import validationUtil from '@/lib/util/validationUtil';
 
@@ -67,8 +77,9 @@ const Onnx = () => {
       const common = {
         inputIndex: o.index,
         precision: modelInputPrecision,
-        library: 'onnxruntime-react-native',
-        resultsId: o.runId
+        library: 'onnxruntime',
+        resultsId: o.runId,
+        delegate: executionProvider as any
       };
 
       if (modelType === 'mobilenet_edgetpu' || modelType === 'mobilenetv2') {
@@ -83,8 +94,7 @@ const Onnx = () => {
           ...common,
           output: numberArray,
           inferenceTimeMs: o.timeMs,
-          model: modelType,
-          delegate: executionProvider
+          model: modelType
         });
         return r?.correct === true;
       }
@@ -104,8 +114,7 @@ const Onnx = () => {
           ...common,
           output: results,
           inferenceTimeMs: o.timeMs,
-          model: modelType,
-          delegate: executionProvider
+          model: modelType
         });
         return r?.correct === true;
       }
@@ -115,8 +124,7 @@ const Onnx = () => {
           ...common,
           output: [],
           inferenceTimeMs: o.timeMs,
-          model: modelType,
-          delegate: executionProvider
+          model: modelType
         });
         return r?.correct === true;
       }
@@ -131,9 +139,10 @@ const Onnx = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Fixed input index</Text>
-      <Text>{onnxRuntime.modelPath}</Text>
       <ScrollView>
+        <PerformanceRunnerScreen service={onnxMLPerformanceRunnerService} />
+
+        <Text>{onnxRuntime.modelPath}</Text>
         {onnxRuntime.modelLoadError && (
           <Text
             style={{

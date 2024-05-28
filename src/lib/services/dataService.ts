@@ -48,11 +48,18 @@ const getArray = (opts: GetArrayOpts) => {
   }
 };
 
+export type CustomImageData = {
+  id: string;
+  array: Uint8Array | Int32Array | Float32Array;
+  buffer: Buffer;
+  base64: string;
+};
+
 const fetchImages = async (
   query: FetchImagesQuery,
   path: string,
   opts?: FetchImagesOpts
-) => {
+): Promise<CustomImageData[]> => {
   const response = await axios.get<FetchImagesQueryData[]>(
     `${baseDataUrl}/${path}`,
     {
